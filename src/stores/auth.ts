@@ -136,7 +136,6 @@ export const useAuthStore = create<AuthStore>()(
         // Register action
         register: async (email, password, confirmPassword, acceptTerms) => {
           try {
-            console.log('🏪 Auth store register called:', { email, acceptTerms })
             set({ isLoading: true, error: null }, false, 'register:start')
             
             const result = await authService.register({ 

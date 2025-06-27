@@ -11,9 +11,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useAuthStore } from '@/stores/auth'
 import { registerSchema, type RegisterFormData } from '@/lib/validations'
-import { testSupabaseConnection, testBasicSignUp } from '@/lib/supabase-test'
-import { runFullDiagnostic, debugSupabaseEnvironment, debugNetworkConnectivity } from '@/lib/debug-supabase'
-import { manualSupabaseTest } from '@/lib/manual-test'
 
 export function RegisterForm() {
   const router = useRouter()
@@ -35,15 +32,12 @@ export function RegisterForm() {
   }, [clearError])
 
   const onSubmit = async (data: RegisterFormData) => {
-    console.log('📝 Form submitted with data:', { email: data.email, acceptTerms: data.acceptTerms })
-    console.log('🔍 Form validation state:', { isValid, errors })
     const result = await registerUser(
       data.email, 
       data.password, 
       data.confirmPassword, 
       data.acceptTerms
     )
-    console.log('📤 Registration result:', result)
     
     if (result.success) {
       if (result.needsVerification) {
@@ -111,16 +105,8 @@ export function RegisterForm() {
             </Alert>
           )}
           
-          {/* Debug Info */}
-          <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-            <p>Form Valid: {isValid ? 'Yes' : 'No'}</p>
-            <p>Errors: {Object.keys(errors).length}</p>
-            <p>Loading: {isFormLoading ? 'Yes' : 'No'}</p>
-          </div>
 
-          <form onSubmit={handleSubmit(onSubmit, (errors) => {
-            console.log('❌ Form validation failed:', errors)
-          })} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <Input
               label="Email Address"
@@ -165,63 +151,9 @@ export function RegisterForm() {
               size="lg"
               className="w-full"
               disabled={isFormLoading}
-              onClick={() => console.log('🔲 Button clicked!')}
             >
               {isFormLoading ? 'Creating account...' : 'Create Account'}
             </Button>
-            
-            {/* Debug buttons - Remove after testing */}
-            <div className="space-y-2">
-              <Button
-                type="button"
-                variant="danger"
-                size="sm"
-                className="w-full"
-                onClick={() => runFullDiagnostic()}
-              >
-                🚨 RUN FULL DIAGNOSTIC
-              </Button>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => debugSupabaseEnvironment()}
-                >
-                  Check Env
-                </Button>
-                
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => debugNetworkConnectivity()}
-                >
-                  Test Network
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => testBasicSignUp()}
-                >
-                  Client Test
-                </Button>
-                
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => manualSupabaseTest()}
-                >
-                  Manual Test
-                </Button>
-              </div>
-            </div>
           </form>
 
           {/* Sign In Link */}

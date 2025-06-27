@@ -12,25 +12,15 @@ export const authService = {
   // Register new user
   async register(data: RegisterFormData): Promise<Result<{ user: AuthUser | null; needsVerification: boolean }>> {
     try {
-      console.log('🔄 Attempting registration for:', data.email)
-      console.log('🔄 Environment check:', {
-        hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        urlStart: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...'
-      })
-      
-      // Try the simplest possible signup first
       const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password
       })
 
       if (error) {
-        console.error('❌ Registration error:', error)
         return { success: false, error: handleSupabaseError(error) }
       }
 
-      console.log('✅ Registration successful:', { user: authData.user?.email, hasSession: !!authData.session })
       return {
         success: true,
         data: {
