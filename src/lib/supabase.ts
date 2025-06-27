@@ -21,8 +21,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 
 // Helper function to handle Supabase errors
 export function handleSupabaseError(error: any): string {
-  console.error('Full Supabase error object:', error)
-  
   if (error?.message) {
     return error.message
   }

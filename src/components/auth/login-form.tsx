@@ -106,7 +106,7 @@ export function LoginForm() {
 
           {/* Sign Up Link */}
           <div className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link 
               href="/auth/register"
               className="text-primary font-medium hover:text-primary/80 transition-colors"

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { authService, onAuthStateChange, type AuthUser } from '@/lib/auth'
+import { offlineProfileService } from '@/lib/offline-profile'
 import type { UserProfile } from '@/types'
 
 interface AuthState {
@@ -25,6 +26,10 @@ interface AuthActions {
   register: (email: string, password: string, confirmPassword: string, acceptTerms: boolean) => Promise<{ success: boolean; needsVerification?: boolean }>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<boolean>
+  
+  // Profile actions
+  updateProfile: (updates: { display_name?: string; default_budget?: number; preferences?: any }) => Promise<boolean>
+  loadProfile: () => Promise<void>
   
   // Utilities
   reset: () => void
@@ -76,20 +81,35 @@ export const useAuthStore = create<AuthStore>()(
             // Get current session
             const sessionResult = await authService.getSession()
             
-            if (sessionResult.success) {
+            if (sessionResult.success && sessionResult.data) {
+              // Load user profile with offline support
+              const profileResult = await offlineProfileService.getProfile()
+              
               set({ 
                 user: sessionResult.data,
+                profile: profileResult.success ? profileResult.data : null,
                 isInitialized: true,
                 isLoading: false 
               }, false, 'initialize:success')
               
               // Set up auth state change listener
-              onAuthStateChange((user) => {
-                set({ user }, false, 'authStateChange')
+              onAuthStateChange(async (user) => {
+                if (user) {
+                  // Load profile when user changes
+                  const profileResult = await offlineProfileService.getProfile()
+                  set({ 
+                    user, 
+                    profile: profileResult.success ? profileResult.data : null 
+                  }, false, 'authStateChange')
+                } else {
+                  set({ user: null, profile: null }, false, 'authStateChange:logout')
+                }
               })
             } else {
               set({ 
-                error: sessionResult.error,
+                user: null,
+                profile: null,
+                error: !sessionResult.success ? sessionResult.error : null,
                 isInitialized: true,
                 isLoading: false 
               }, false, 'initialize:error')
@@ -230,6 +250,47 @@ export const useAuthStore = create<AuthStore>()(
               isLoading: false 
             }, false, 'resetPassword:catch')
             return false
+          }
+        },
+        
+        // Profile management actions
+        updateProfile: async (updates) => {
+          try {
+            set({ isLoading: true, error: null }, false, 'updateProfile:start')
+            
+            const result = await offlineProfileService.updateProfile(updates)
+            
+            if (result.success) {
+              set({ 
+                profile: result.data,
+                isLoading: false,
+                error: null 
+              }, false, 'updateProfile:success')
+              return true
+            } else {
+              set({ 
+                error: result.error,
+                isLoading: false 
+              }, false, 'updateProfile:error')
+              return false
+            }
+          } catch (error) {
+            set({ 
+              error: 'Failed to update profile. Please try again.',
+              isLoading: false 
+            }, false, 'updateProfile:catch')
+            return false
+          }
+        },
+
+        loadProfile: async () => {
+          try {
+            const result = await offlineProfileService.getProfile()
+            if (result.success) {
+              set({ profile: result.data }, false, 'loadProfile:success')
+            }
+          } catch (error) {
+            // Silent fail for profile loading
           }
         },
         

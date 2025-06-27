@@ -65,7 +65,7 @@ export function RegisterForm() {
           <Alert variant="success">
             <AlertTitle>Check your email!</AlertTitle>
             <AlertDescription>
-              We've sent you a verification link. Please check your email and click the link to activate your account.
+              We&apos;ve sent you a verification link. Please check your email and click the link to activate your account.
             </AlertDescription>
           </Alert>
 

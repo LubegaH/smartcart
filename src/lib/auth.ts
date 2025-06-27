@@ -3,9 +3,7 @@ import type { LoginFormData, RegisterFormData, ResetPasswordFormData } from './v
 import type { Result } from '@/types'
 import type { User } from '@supabase/supabase-js'
 
-export interface AuthUser extends User {
-  // Use the existing User interface from Supabase
-}
+export type AuthUser = User
 
 // Authentication service functions
 export const authService = {

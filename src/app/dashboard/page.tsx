@@ -1,73 +1,112 @@
 'use client'
 
-import { useAuthStore } from '@/stores/auth'
-import { Button } from '@/components/ui/button'
+import * as React from 'react'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/stores/auth'
 
 export default function DashboardPage() {
-  const { user, logout, isLoading } = useAuthStore()
   const router = useRouter()
+  const { user, profile, logout, isLoading } = useAuthStore()
+
+  // Redirect if not authenticated
+  React.useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/auth/login')
+    }
+  }, [user, isLoading, router])
 
   const handleLogout = async () => {
     await logout()
-    router.push('/auth/login')
+    router.push('/')
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl">🛒</div>
+          <p className="text-gray-600 mt-2">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!user) {
-    router.push('/auth/login')
-    return null
+    return null // Will redirect
   }
 
   return (
-    <main className="min-h-screen p-6 bg-background">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-md mx-auto space-y-8">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Welcome back, {user.email}!</p>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={handleLogout}
-            disabled={isLoading}
+        <div className="text-center space-y-4">
+          <div className="text-5xl">🛒</div>
+          <h1 className="text-2xl font-bold text-gray-900">SmartCart Dashboard</h1>
+          <p className="text-sm text-gray-600">
+            Welcome back, {profile?.display_name || user.email}!
+          </p>
+        </div>
+
+        {/* Profile Summary */}
+        <div className="bg-white rounded-lg border p-4 space-y-2">
+          <h2 className="font-semibold text-gray-900">Profile Info</h2>
+          <p className="text-sm text-gray-600">Email: {user.email}</p>
+          {profile?.display_name && (
+            <p className="text-sm text-gray-600">Name: {profile.display_name}</p>
+          )}
+          {profile?.default_budget && (
+            <p className="text-sm text-gray-600">
+              Default Budget: {profile.preferences?.default_currency || 'USD'} {profile.default_budget}
+            </p>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
+          
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={() => router.push('/profile')}
           >
-            {isLoading ? 'Signing out...' : 'Sign Out'}
+            Manage Profile
+          </Button>
+
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full"
+            disabled
+          >
+            Create Shopping Trip
+            <span className="text-xs ml-2">(Coming Soon)</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full"
+            disabled
+          >
+            View Price History
+            <span className="text-xs ml-2">(Coming Soon)</span>
           </Button>
         </div>
 
-        {/* Status Card */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Authentication Complete! ✅
-          </h2>
-          <div className="space-y-2 text-sm text-gray-600">
-            <p>✅ User successfully authenticated</p>
-            <p>✅ Session management working</p>
-            <p>✅ Logout functionality ready</p>
-            <p>⏳ Dashboard UI (Phase 2.2 next)</p>
-            <p>⏳ Shopping trip management (Phase 2.4)</p>
-          </div>
-        </div>
-
-        {/* User Info */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">User Information</h3>
-          <div className="space-y-2 text-sm">
-            <p><span className="font-medium">Email:</span> {user.email}</p>
-            <p><span className="font-medium">User ID:</span> {user.id}</p>
-            <p><span className="font-medium">Created:</span> {new Date(user.created_at).toLocaleDateString()}</p>
-            <p><span className="font-medium">Email Confirmed:</span> {user.email_confirmed_at ? 'Yes' : 'No'}</p>
-          </div>
-        </div>
-
-        {/* Next Steps */}
-        <div className="text-center text-sm text-gray-600">
-          <p>Phase 2: MVP Core Development</p>
-          <p className="font-medium text-green-600">✅ Checkpoint 2.1 COMPLETE</p>
-          <p className="mt-2">Ready for Checkpoint 2.2: Core Data Models & Database</p>
+        {/* Account Actions */}
+        <div className="border-t pt-6 space-y-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={handleLogout}
+          >
+            Sign Out
+          </Button>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

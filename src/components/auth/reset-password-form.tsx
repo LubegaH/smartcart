@@ -51,13 +51,13 @@ export function ResetPasswordForm() {
           <Alert variant="success">
             <AlertTitle>Check your email!</AlertTitle>
             <AlertDescription>
-              We've sent you a password reset link. Please check your email and click the link to reset your password.
+              We&apos;ve sent you a password reset link. Please check your email and click the link to reset your password.
             </AlertDescription>
           </Alert>
 
           <div className="text-center space-y-4">
             <p className="text-sm text-gray-600">
-              Didn't receive the email? Check your spam folder or try again.
+              Didn&apos;t receive the email? Check your spam folder or try again.
             </p>
             <div className="space-x-4">
               <Button 
@@ -90,7 +90,7 @@ export function ResetPasswordForm() {
           <div className="text-center">
             <h2 className="text-xl font-semibold text-gray-900">Reset your password</h2>
             <p className="text-sm text-gray-600 mt-2">
-              Enter your email address and we'll send you a link to reset your password
+              Enter your email address and we&apos;ll send you a link to reset your password
             </p>
           </div>
 
