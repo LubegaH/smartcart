@@ -1,0 +1,48 @@
+{
+  "name": "smartcart",
+  "version": "1.0.0",
+  "description": "An intelligent grocery shopping PWA focused on price tracking and consumption optimization",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@supabase/supabase-js": "^2.50.2",
+    "@tailwindcss/postcss": "^4.1.10",
+    "@types/node": "^24.0.4",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "autoprefixer": "^10.4.21",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "eslint": "^9.29.0",
+    "eslint-config-next": "^15.3.4",
+    "next": "^15.3.4",
+    "next-pwa": "^5.6.0",
+    "postcss": "^8.5.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.58.1",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.67",
+    "zustand": "^5.0.5"
+  },
+  "keywords": [
+    "pwa",
+    "grocery",
+    "shopping",
+    "price-tracking",
+    "mobile-first"
+  ],
+  "author": "",
+  "license": "MIT"
+}
