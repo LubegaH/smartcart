@@ -4,26 +4,45 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
+    /* SmartCart Color Scheme - AirBnB Style */
+    --background: 0 0% 100%;                    /* #ffffff */
+    --foreground: 222.2 84% 4.9%;               /* Dark text */
+    --card: 220 14% 96%;                        /* #f9fafb - Light gray surface */
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 210 40% 94%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 94%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 72.22% 50.59%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142.1 76.2% 36.3%;
-    --radius: 0.5rem;
+    
+    /* Primary: Green for shopping success/CTAs */
+    --primary: 158 64% 52%;                     /* #10b981 */
+    --primary-foreground: 0 0% 100%;            /* White text on primary */
+    
+    /* Secondary: Blue for information/secondary actions */
+    --secondary: 213 94% 68%;                   /* #3b82f6 */
+    --secondary-foreground: 0 0% 100%;          /* White text on secondary */
+    
+    /* Accent: Yellow/amber for highlights */
+    --accent: 38 92% 50%;                       /* #f59e0b */
+    --accent-foreground: 0 0% 100%;             /* White text on accent */
+    
+    /* Warning: Yellow for budget warnings */
+    --warning: 38 92% 50%;                      /* #f59e0b */
+    --warning-foreground: 0 0% 100%;
+    
+    /* Danger: Red for delete/over budget */
+    --destructive: 0 84% 60%;                   /* #ef4444 */
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Success: Green for success states */
+    --success: 158 64% 52%;                     /* #10b981 */
+    --success-foreground: 0 0% 100%;
+    
+    /* Neutral colors */
+    --muted: 220 14% 96%;                       /* #f9fafb */
+    --muted-foreground: 215 25% 27%;            /* #6b7280 */
+    --border: 220 13% 91%;                      /* #e5e7eb */
+    --input: 220 13% 91%;                       /* #e5e7eb */
+    --ring: 158 64% 52%;                        /* #10b981 - Focus ring */
+    --radius: 0.75rem;                          /* 12px border radius */
   }
 }
 
@@ -48,3 +67,4 @@
     @apply min-h-[56px] min-w-[56px];
   }
 }
+
