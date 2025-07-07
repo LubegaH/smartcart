@@ -253,6 +253,42 @@ export const offlineDataService = {
       }
     },
 
+    async getById(id: string): Promise<Result<ShoppingTrip>> {
+      try {
+        if (navigator.onLine) {
+          const result = await tripService.getTrip(id)
+          if (result.success) {
+            // Update individual trip in cache
+            const cached = await offlineStorage.getItem(CACHE_KEYS.trips) || []
+            const tripIndex = cached.findIndex((trip: ShoppingTrip) => trip.id === id)
+            if (tripIndex >= 0) {
+              cached[tripIndex] = result.data
+            } else {
+              cached.push(result.data)
+            }
+            await offlineStorage.setItem(CACHE_KEYS.trips, 'trips', cached)
+            return result
+          }
+        }
+
+        // Try to find in cache
+        const cached = await offlineStorage.getItem(CACHE_KEYS.trips) || []
+        const trip = cached.find((trip: ShoppingTrip) => trip.id === id)
+        
+        if (trip) {
+          return { success: true, data: trip }
+        }
+
+        if (!navigator.onLine) {
+          return { success: false, error: 'Trip not found in cache' }
+        }
+
+        return { success: false, error: 'Trip not found' }
+      } catch (error) {
+        return { success: false, error: 'Failed to get trip' }
+      }
+    },
+
     async create(data: CreateTripData): Promise<Result<ShoppingTrip>> {
       try {
         if (navigator.onLine) {
@@ -336,6 +372,33 @@ export const offlineDataService = {
       }
     },
 
+    async delete(id: string): Promise<Result<void>> {
+      try {
+        if (navigator.onLine) {
+          const result = await tripService.deleteTrip(id)
+          if (result.success) {
+            await this.refreshCache()
+            return result
+          } else {
+            await this.queueAction({ type: 'DELETE_TRIP', id })
+            return result
+          }
+        } else {
+          // Offline: remove from cache optimistically
+          const cached = await offlineStorage.getItem(CACHE_KEYS.trips) || []
+          const filtered = cached.filter((trip: ShoppingTrip) => trip.id !== id)
+          await offlineStorage.setItem(CACHE_KEYS.trips, 'trips', filtered)
+
+          // Queue for sync
+          await this.queueAction({ type: 'DELETE_TRIP', id })
+
+          return { success: true, data: undefined }
+        }
+      } catch (error) {
+        return { success: false, error: 'Failed to delete trip' }
+      }
+    },
+
     async getActive(): Promise<Result<ShoppingTrip | null>> {
       try {
         if (navigator.onLine) {
@@ -379,7 +442,7 @@ export const offlineDataService = {
 
   // Trip items with offline support
   items: {
-    async getForTrip(tripId: string): Promise<Result<TripItem[]>> {
+    async getByTripId(tripId: string): Promise<Result<TripItem[]>> {
       try {
         if (navigator.onLine) {
           const result = await tripItemService.getItems(tripId)
@@ -441,6 +504,62 @@ export const offlineDataService = {
         }
       } catch (error) {
         return { success: false, error: 'Failed to create item' }
+      }
+    },
+
+    async update(id: string, updates: Partial<TripItem>): Promise<Result<TripItem>> {
+      try {
+        if (navigator.onLine) {
+          const result = await tripItemService.updateItem(id, updates)
+          if (result.success) {
+            // Find which trip this item belongs to and refresh cache
+            const item = result.data
+            await this.refreshCache(item.trip_id)
+            return result
+          }
+        }
+
+        // Offline: update cache optimistically
+        await this.updateItemInCache(id, updates)
+        await this.queueAction({ type: 'UPDATE_ITEM', id, data: updates })
+
+        // Return optimistic result
+        const updatedItem = await this.findItemInCache(id)
+        if (updatedItem) {
+          return { success: true, data: updatedItem }
+        }
+
+        return { success: false, error: 'Item not found in cache' }
+      } catch (error) {
+        return { success: false, error: 'Failed to update item' }
+      }
+    },
+
+    async delete(id: string): Promise<Result<void>> {
+      try {
+        if (navigator.onLine) {
+          const result = await tripItemService.deleteItem(id)
+          if (result.success) {
+            // Find which trip this item belongs to and refresh cache
+            const item = await this.findItemInCache(id)
+            if (item) {
+              await this.refreshCache(item.trip_id)
+            }
+            return result
+          }
+        }
+
+        // Offline: remove from cache optimistically
+        const item = await this.findItemInCache(id)
+        if (item) {
+          await this.removeItemFromCache(id, item.trip_id)
+          await this.queueAction({ type: 'DELETE_ITEM', id })
+          return { success: true, data: undefined }
+        }
+
+        return { success: false, error: 'Item not found in cache' }
+      } catch (error) {
+        return { success: false, error: 'Failed to delete item' }
       }
     },
 
@@ -521,6 +640,12 @@ export const offlineDataService = {
           return
         }
       }
+    },
+
+    async removeItemFromCache(id: string, tripId: string): Promise<void> {
+      const items = await offlineStorage.getItem(CACHE_KEYS.tripItems(tripId)) || []
+      const filteredItems = items.filter((item: TripItem) => item.id !== id)
+      await offlineStorage.setItem(CACHE_KEYS.tripItems(tripId), 'trip_items', filteredItems)
     },
 
     async queueAction(action: SyncAction): Promise<void> {

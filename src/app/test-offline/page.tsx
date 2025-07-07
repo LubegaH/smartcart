@@ -75,7 +75,7 @@ export default function TestOfflinePage() {
 
   const loadTripItems = async (tripId: string) => {
     setLoading(true)
-    const result = await dataService.items.getForTrip(tripId)
+    const result = await dataService.tripItems.getByTripId(tripId)
     if (result.success) {
       setTripItems(result.data)
       showMessage(`Loaded ${result.data.length} items ${isOnline ? '(online)' : '(cached)'}`)
@@ -145,7 +145,7 @@ export default function TestOfflinePage() {
     }
 
     setLoading(true)
-    const result = await dataService.items.create(activeTrip.id, {
+    const result = await dataService.tripItems.create(activeTrip.id, {
       item_name: itemName,
       quantity: 1,
       estimated_price: itemPrice ? parseFloat(itemPrice) : undefined
@@ -165,7 +165,7 @@ export default function TestOfflinePage() {
 
   const updateItemPrice = async (itemId: string, actualPrice: number) => {
     setLoading(true)
-    const result = await dataService.items.updatePrice(itemId, actualPrice)
+    const result = await dataService.tripItems.updatePrice(itemId, actualPrice)
     
     if (result.success) {
       showMessage(`Updated price to $${actualPrice} ${isOnline ? '(synced)' : '(queued)'}`)
@@ -181,7 +181,7 @@ export default function TestOfflinePage() {
 
   const toggleItemCompleted = async (itemId: string) => {
     setLoading(true)
-    const result = await dataService.items.toggleCompleted(itemId)
+    const result = await dataService.tripItems.toggleCompleted(itemId)
     
     if (result.success) {
       showMessage(`Item ${result.data.is_completed ? 'completed' : 'uncompleted'} ${isOnline ? '(synced)' : '(queued)'}`)
