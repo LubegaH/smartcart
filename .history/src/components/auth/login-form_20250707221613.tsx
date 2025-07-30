@@ -16,9 +16,7 @@ export function LoginForm() {
   const router = useRouter();
   const { login, isLoading, error, clearError } = useAuthStore();
   const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  useEffect();
 
   const {
     register,
@@ -43,14 +41,6 @@ export function LoginForm() {
   };
 
   const isFormLoading = isLoading || isSubmitting;
-
-  if (!isClient) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <>

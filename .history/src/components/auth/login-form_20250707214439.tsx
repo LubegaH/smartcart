@@ -10,15 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/auth';
 import { loginSchema, type LoginFormData } from '@/lib/validations';
-import { useState, useEffect } from 'react';
 
 export function LoginForm() {
   const router = useRouter();
   const { login, isLoading, error, clearError } = useAuthStore();
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const {
     register,
@@ -44,14 +39,6 @@ export function LoginForm() {
 
   const isFormLoading = isLoading || isSubmitting;
 
-  if (!isClient) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div
@@ -73,13 +60,6 @@ export function LoginForm() {
       <div className='mb-4'>
         <div className='bg-primary p-4 text-primary-foreground rounded-lg'>
           CSS Variable Test - Should be green
-        </div>
-      </div>
-      {/* RESPONSIVE TEST */}
-      <div className='mb-4'>
-        <div className='bg-red-500 p-2 sm:bg-blue-500 sm:p-4 md:bg-green-500 md:p-6 lg:bg-purple-500 lg:p-8 text-white rounded'>
-          Responsive Test: Red(mobile) → Blue(640px+) → Green(768px+) →
-          Purple(1024px+)
         </div>
       </div>
       <div className='min-h-screen flex flex-col items-center justify-center p-6 bg-background'>

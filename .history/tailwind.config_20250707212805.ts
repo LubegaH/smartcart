@@ -36,24 +36,27 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      // Enhanced responsive spacing
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '128': '32rem',
+        '18': '4.5rem',   // 72px
+        '88': '22rem',    // 352px
+        '128': '32rem',   // 512px
       },
+      // Enhanced shadows for depth
       boxShadow: {
         'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.04)',
         'medium': '0 4px 12px 0 rgba(0, 0, 0, 0.08)',
         'large': '0 8px 24px 0 rgba(0, 0, 0, 0.12)',
         'inner-soft': 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.04)',
       },
+      // Enhanced responsive breakpoints
       screens: {
-        'xs': '475px',
-        'sm': '640px',
-        'md': '768px',
-        'lg': '1024px',
-        'xl': '1280px',
-        '2xl': '1536px',
+        'xs': '475px',   // Extra small phones
+        'sm': '640px',   // Small tablets
+        'md': '768px',   // Tablets
+        'lg': '1024px',  // Small desktops
+        'xl': '1280px',  // Large desktops
+        '2xl': '1536px', // Extra large
       }
     },
   },

@@ -10,15 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/auth';
 import { loginSchema, type LoginFormData } from '@/lib/validations';
-import { useState, useEffect } from 'react';
 
 export function LoginForm() {
   const router = useRouter();
   const { login, isLoading, error, clearError } = useAuthStore();
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const {
     register,
@@ -44,42 +39,17 @@ export function LoginForm() {
 
   const isFormLoading = isLoading || isSubmitting;
 
-  if (!isClient) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div
-        style={{
-          backgroundColor: 'hsl(158, 64%, 52%)',
-          color: 'white',
-          padding: '16px',
-          marginBottom: '16px',
-          borderRadius: '8px',
-        }}
-      >
-        Direct CSS Test - Should be green
-      </div>
-
-      <div className='mb-4 p-4 bg-green-500 text-white rounded-lg'>
-        Tailwind Green Test - Should be green
-      </div>
-
-      <div className='mb-4'>
-        <div className='bg-primary p-4 text-primary-foreground rounded-lg'>
-          CSS Variable Test - Should be green
+      <div className='mb-4 p-4 bg-primary/10 border border-primary/20 rounded-lg'>
+        <div className='text-responsive-sm text-primary font-medium'>
+          Responsive Test (remove this after testing)
         </div>
-      </div>
-      {/* RESPONSIVE TEST */}
-      <div className='mb-4'>
-        <div className='bg-red-500 p-2 sm:bg-blue-500 sm:p-4 md:bg-green-500 md:p-6 lg:bg-purple-500 lg:p-8 text-white rounded'>
-          Responsive Test: Red(mobile) → Blue(640px+) → Green(768px+) →
-          Purple(1024px+)
+        <div className='mt-2 space-y-2'>
+          <div className='h-12 bg-primary/20 rounded touch-target-large'></div>
+          <div className='text-xs text-muted-foreground'>
+            Mobile: 16px padding | Tablet: 24px | Desktop: 32px
+          </div>
         </div>
       </div>
       <div className='min-h-screen flex flex-col items-center justify-center p-6 bg-background'>

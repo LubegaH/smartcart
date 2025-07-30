@@ -111,3 +111,14 @@
     @apply card-elevated hover:border-primary/20 cursor-pointer;
   }
 }
+
+/* Ensure minimum touch target sizes for mobile
+@layer utilities {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .touch-target-large {
+    @apply min-h-[56px] min-w-[56px];
+  }
+} */

@@ -10,15 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/auth';
 import { loginSchema, type LoginFormData } from '@/lib/validations';
-import { useState, useEffect } from 'react';
+import 
 
 export function LoginForm() {
   const router = useRouter();
   const { login, isLoading, error, clearError } = useAuthStore();
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const {
     register,
@@ -43,14 +39,6 @@ export function LoginForm() {
   };
 
   const isFormLoading = isLoading || isSubmitting;
-
-  if (!isClient) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <>

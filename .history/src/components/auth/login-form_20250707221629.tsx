@@ -44,14 +44,6 @@ export function LoginForm() {
 
   const isFormLoading = isLoading || isSubmitting;
 
-  if (!isClient) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='text-center'>Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div
