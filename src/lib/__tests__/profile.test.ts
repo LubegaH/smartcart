@@ -535,4 +535,66 @@ describe('profileService', () => {
       expect(result.error).toBe('Failed to delete account')
     })
   })
+
+  describe('Currency Support', () => {
+    it('should support UGX currency in user preferences', async () => {
+      const mockUser = {
+        id: 'user-123',
+        email: 'test@example.com'
+      }
+
+      vi.mocked(supabase.auth.getUser).mockResolvedValue({
+        data: { user: mockUser },
+        error: null
+      })
+
+      const updateData = {
+        display_name: 'Ham Trovi',
+        default_budget: 500000.00, // UGX amount
+        preferences: {
+          notifications_enabled: true,
+          dark_mode: false,
+          default_currency: 'UGX' as const
+        }
+      }
+
+      const mockProfile = {
+        id: 'profile-123',
+        user_id: mockUser.id,
+        display_name: 'Ham Trovi',
+        default_budget: 500000.00,
+        preferences: {
+          notifications_enabled: true,
+          dark_mode: false,
+          default_currency: 'UGX'
+        },
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z'
+      }
+
+      const mockUpdateQuery = {
+        update: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockResolvedValue({
+          data: mockProfile,
+          error: null
+        })
+      }
+
+      vi.mocked(supabase.from).mockReturnValue(mockUpdateQuery as any)
+
+      const result = await profileService.updateProfile(updateData)
+
+      expect(result.success).toBe(true)
+      expect(result.data?.preferences.default_currency).toBe('UGX')
+      expect(mockUpdateQuery.update).toHaveBeenCalledWith({
+        display_name: 'Ham Trovi',
+        default_budget: 500000.00,
+        preferences: {
+          notifications_enabled: true,
+          dark_mode: false,
+          default_currency: 'UGX'
+        }
+      })
+    })
+  })
 })

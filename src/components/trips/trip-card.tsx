@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/hooks/useCurrency';
 import type { ShoppingTrip } from '@/types';
 
 interface TripCardProps {
@@ -12,6 +13,8 @@ interface TripCardProps {
 }
 
 export function TripCard({ trip, onEdit, onViewDetails, onDelete }: TripCardProps) {
+  const { formatAmount } = useCurrency();
+  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'planned':
@@ -25,13 +28,6 @@ export function TripCard({ trip, onEdit, onViewDetails, onDelete }: TripCardProp
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
   };
 
   const getItemCount = () => {
@@ -82,7 +78,7 @@ export function TripCard({ trip, onEdit, onViewDetails, onDelete }: TripCardProp
           <div>
             <p className='text-sm text-gray-500'>Estimated Total</p>
             <p className='text-sm font-medium text-gray-900'>
-              {trip.estimated_total ? formatCurrency(trip.estimated_total) : 'Not set'}
+              {trip.estimated_total ? formatAmount(trip.estimated_total) : 'Not set'}
             </p>
           </div>
         </div>
@@ -111,7 +107,7 @@ export function TripCard({ trip, onEdit, onViewDetails, onDelete }: TripCardProp
             <div className='flex justify-between items-center'>
               <span className='text-sm text-gray-600'>Final Total</span>
               <span className='text-sm font-semibold text-gray-900'>
-                {formatCurrency(trip.actual_total)}
+                {formatAmount(trip.actual_total)}
               </span>
             </div>
             {trip.estimated_total && (
@@ -127,7 +123,7 @@ export function TripCard({ trip, onEdit, onViewDetails, onDelete }: TripCardProp
                   }`}
                 >
                   {trip.actual_total > trip.estimated_total ? '+' : ''}
-                  {formatCurrency(trip.actual_total - trip.estimated_total)}
+                  {formatAmount(trip.actual_total - trip.estimated_total)}
                 </span>
               </div>
             )}

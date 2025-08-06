@@ -8,9 +8,18 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Select } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useAuthStore } from '@/stores/auth'
 import { registerSchema, type RegisterFormData } from '@/lib/validations'
+
+const currencyOptions = [
+  { value: 'USD', label: 'US Dollar (USD)' },
+  { value: 'EUR', label: 'Euro (EUR)' },
+  { value: 'GBP', label: 'British Pound (GBP)' },
+  { value: 'CAD', label: 'Canadian Dollar (CAD)' },
+  { value: 'UGX', label: 'Uganda Shillings (UGX)' }
+]
 
 export function RegisterForm() {
   const router = useRouter()
@@ -36,7 +45,8 @@ export function RegisterForm() {
       data.email, 
       data.password, 
       data.confirmPassword, 
-      data.acceptTerms
+      data.acceptTerms,
+      data.preferredCurrency
     )
     
     if (result.success) {
@@ -135,6 +145,15 @@ export function RegisterForm() {
               error={errors.confirmPassword?.message}
               disabled={isFormLoading}
               {...register('confirmPassword')}
+            />
+
+            {/* Currency Selection */}
+            <Select
+              label="Preferred Currency"
+              options={currencyOptions}
+              error={errors.preferredCurrency?.message}
+              disabled={isFormLoading}
+              {...register('preferredCurrency')}
             />
 
             {/* Terms Checkbox */}

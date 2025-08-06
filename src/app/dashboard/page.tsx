@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth'
+import Image from 'next/image'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -25,7 +26,15 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl">🛒</div>
+          <div className="mb-4 flex justify-center">
+            <Image
+              src='/smartcart_icon.svg'
+              alt='SmartCart'
+              width={48}
+              height={48}
+              className='w-12 h-12'
+            />
+          </div>
           <p className="text-gray-600 mt-2">Loading...</p>
         </div>
       </div>
@@ -41,7 +50,16 @@ export default function DashboardPage() {
       <div className="max-w-md mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <div className="text-5xl">🛒</div>
+          <div className="flex justify-center mb-4">
+            <Image
+              src='/smartcart_icon.svg'
+              alt='SmartCart'
+              width={80}
+              height={80}
+              className='w-20 h-20'
+              priority
+            />
+          </div>
           <h1 className="text-2xl font-bold text-gray-900">SmartCart Dashboard</h1>
           <p className="text-sm text-gray-600">
             Welcome back, {profile?.display_name || user.email}!

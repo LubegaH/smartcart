@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/hooks/useCurrency';
 import type { ShoppingTrip } from '@/types';
 
 interface TripHeaderProps {
@@ -13,6 +14,8 @@ interface TripHeaderProps {
 }
 
 export function TripHeader({ trip, onEdit, onStartShopping, onBack, onContinueShopping }: TripHeaderProps) {
+  const { formatAmount } = useCurrency();
+  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'planned':
@@ -26,13 +29,6 @@ export function TripHeader({ trip, onEdit, onStartShopping, onBack, onContinueSh
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
   };
 
   const getCompletionStats = () => {
@@ -116,7 +112,7 @@ export function TripHeader({ trip, onEdit, onStartShopping, onBack, onContinueSh
             <div>
               <p className='text-sm text-gray-500'>Estimated Total</p>
               <p className='text-xl font-semibold text-gray-900'>
-                {trip.estimated_total ? formatCurrency(trip.estimated_total) : 'Not set'}
+                {trip.estimated_total ? formatAmount(trip.estimated_total) : 'Not set'}
               </p>
             </div>
             <div className='w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center'>
@@ -133,14 +129,14 @@ export function TripHeader({ trip, onEdit, onStartShopping, onBack, onContinueSh
               <div>
                 <p className='text-sm text-gray-500'>Actual Total</p>
                 <p className='text-xl font-semibold text-gray-900'>
-                  {formatCurrency(trip.actual_total)}
+                  {formatAmount(trip.actual_total)}
                 </p>
                 {trip.estimated_total && (
                   <p className={`text-xs font-medium ${
                     trip.actual_total > trip.estimated_total ? 'text-red-600' : 'text-green-600'
                   }`}>
                     {trip.actual_total > trip.estimated_total ? '+' : ''}
-                    {formatCurrency(trip.actual_total - trip.estimated_total)} vs. estimated
+                    {formatAmount(trip.actual_total - trip.estimated_total)} vs. estimated
                   </p>
                 )}
               </div>

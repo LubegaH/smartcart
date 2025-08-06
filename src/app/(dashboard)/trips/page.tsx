@@ -65,6 +65,20 @@ export default function TripsPage() {
   return (
     <div className='min-h-screen bg-gray-50'>
       <div className='max-w-4xl mx-auto px-4 py-6'>
+        {/* Navigation */}
+        <nav className='flex items-center space-x-2 text-sm text-gray-500 mb-4'>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className='hover:text-gray-700 transition-colors duration-200'
+          >
+            Dashboard
+          </button>
+          <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
+          </svg>
+          <span className='text-gray-900 font-medium'>Shopping Trips</span>
+        </nav>
+
         {/* Header */}
         <div className='flex items-center justify-between mb-6'>
           <div>

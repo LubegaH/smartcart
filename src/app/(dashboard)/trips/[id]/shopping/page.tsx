@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/hooks/useCurrency';
 import { dataService } from '@/lib/data';
 import type { ShoppingTrip, TripItem } from '@/types';
 
 export default function ShoppingModePage() {
+  const { formatAmount, step, decimals } = useCurrency();
   const router = useRouter();
   const params = useParams();
   const tripId = params.id as string;
@@ -83,13 +85,6 @@ export default function ShoppingModePage() {
   const completedItems = items.filter(item => item.is_completed);
   const pendingItems = items.filter(item => !item.is_completed);
   const progress = items.length > 0 ? Math.round((completedItems.length / items.length) * 100) : 0;
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
   if (isLoading) {
     return (
@@ -243,15 +238,9 @@ function ShoppingItem({
   onToggleComplete: (item: TripItem) => void;
   onUpdatePrice: (item: TripItem, price: number) => void;
 }) {
+  const { formatAmount, step, decimals } = useCurrency();
   const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [priceInput, setPriceInput] = useState(item.actual_price?.toString() || '');
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
   const handleSavePrice = () => {
     const price = parseFloat(priceInput);
@@ -298,7 +287,7 @@ function ShoppingItem({
                 <div className='flex items-center space-x-2'>
                   <input
                     type='number'
-                    step='0.01'
+                    step={step}
                     min='0'
                     value={priceInput}
                     onChange={(e) => setPriceInput(e.target.value)}
@@ -307,7 +296,7 @@ function ShoppingItem({
                       if (e.key === 'Escape') setIsEditingPrice(false);
                     }}
                     className='w-20 px-2 py-1 text-sm border border-gray-300 rounded'
-                    placeholder='0.00'
+                    placeholder={decimals ? '0.00' : '0'}
                     autoFocus
                   />
                   <Button size='sm' onClick={handleSavePrice} className='h-6 px-2 text-xs'>
@@ -318,11 +307,11 @@ function ShoppingItem({
                 <div className='flex items-center space-x-2'>
                   {item.actual_price ? (
                     <span className='text-sm font-medium text-gray-900'>
-                      {formatCurrency(item.actual_price)}
+                      {formatAmount(item.actual_price)}
                     </span>
                   ) : item.estimated_price ? (
                     <span className='text-sm text-gray-600'>
-                      Est: {formatCurrency(item.estimated_price)}
+                      Est: {formatAmount(item.estimated_price)}
                     </span>
                   ) : (
                     <span className='text-sm text-gray-400'>No price</span>

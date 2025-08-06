@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useCurrency } from '@/hooks/useCurrency';
 import type { TripItem, TripStatus } from '@/types';
 
 interface ItemCardProps {
@@ -26,15 +27,9 @@ export function ItemCard({
   onCancelEdit,
   onDelete,
 }: ItemCardProps) {
+  const { formatAmount, step, decimals } = useCurrency();
   const [editPrice, setEditPrice] = useState(item.actual_price?.toString() || item.estimated_price?.toString() || '');
   const [editQuantity, setEditQuantity] = useState(item.quantity.toString());
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
   const handleSave = () => {
     const price = parseFloat(editPrice);
@@ -157,14 +152,14 @@ export function ItemCard({
                       </label>
                       <Input
                         type='number'
-                        step='0.01'
+                        step={step}
                         min='0'
                         value={editPrice}
                         onChange={(e) => setEditPrice(e.target.value)}
                         onKeyDown={handleKeyPress}
                         onBlur={handleBlur}
                         className='text-sm h-8'
-                        placeholder='0.00'
+                        placeholder={decimals ? '0.00' : '0'}
                       />
                     </div>
                   </div>
@@ -176,11 +171,11 @@ export function ItemCard({
                       </span>
                       {item.actual_price ? (
                         <span className='text-gray-900 font-medium'>
-                          {formatCurrency(item.actual_price)} each
+                          {formatAmount(item.actual_price)} each
                         </span>
                       ) : item.estimated_price ? (
                         <span className='text-gray-600'>
-                          Est: {formatCurrency(item.estimated_price)} each
+                          Est: {formatAmount(item.estimated_price)} each
                         </span>
                       ) : (
                         <span className='text-gray-400'>No price set</span>
@@ -195,7 +190,7 @@ export function ItemCard({
                             item.actual_price ? 'text-gray-900' : 'text-gray-600'
                           }`}
                         >
-                          {formatCurrency(getItemTotal())}
+                          {formatAmount(getItemTotal())}
                         </span>
                         {!item.actual_price && item.estimated_price && (
                           <p className='text-xs text-gray-500'>estimated</p>

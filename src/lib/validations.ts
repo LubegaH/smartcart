@@ -23,6 +23,9 @@ export const registerSchema = z.object({
     .email('Please enter a valid email address'),
   password: passwordSchema,
   confirmPassword: z.string().min(1, 'Please confirm your password'),
+  preferredCurrency: z
+    .enum(['USD', 'EUR', 'GBP', 'CAD', 'UGX'])
+    .default('USD'),
   acceptTerms: z
     .boolean()
     .refine((val) => val === true, 'You must accept the terms of service')

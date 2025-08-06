@@ -23,7 +23,7 @@ interface AuthActions {
   // Auth actions
   initialize: () => Promise<void>
   login: (email: string, password: string) => Promise<boolean>
-  register: (email: string, password: string, confirmPassword: string, acceptTerms: boolean) => Promise<{ success: boolean; needsVerification?: boolean }>
+  register: (email: string, password: string, confirmPassword: string, acceptTerms: boolean, preferredCurrency?: string) => Promise<{ success: boolean; needsVerification?: boolean }>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<boolean>
   
@@ -154,7 +154,7 @@ export const useAuthStore = create<AuthStore>()(
         },
         
         // Register action
-        register: async (email, password, confirmPassword, acceptTerms) => {
+        register: async (email, password, confirmPassword, acceptTerms, preferredCurrency = 'USD') => {
           try {
             set({ isLoading: true, error: null }, false, 'register:start')
             
@@ -162,7 +162,8 @@ export const useAuthStore = create<AuthStore>()(
               email, 
               password, 
               confirmPassword, 
-              acceptTerms 
+              acceptTerms,
+              preferredCurrency
             })
             
             if (result.success) {

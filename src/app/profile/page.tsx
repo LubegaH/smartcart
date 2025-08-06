@@ -14,7 +14,7 @@ import { useOnlineStatus } from '@/components/ui/offline-indicator'
 
 const profileSchema = z.object({
   display_name: z.string().optional(),
-  default_budget: z.number().optional(),
+  default_budget: z.coerce.number().min(0, 'Budget must be a positive number').optional(),
   notifications_enabled: z.boolean(),
   dark_mode: z.boolean(),
   default_currency: z.string().min(1, 'Currency is required')
@@ -28,12 +28,24 @@ export default function ProfilePage() {
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
   const [showDeleteAccount, setShowDeleteAccount] = React.useState(false)
   const isOnline = useOnlineStatus()
+  
+  // Helper function to get currency symbol
+  const getCurrencySymbol = (currency: string) => {
+    switch (currency) {
+      case 'USD': case 'CAD': return '$'
+      case 'EUR': return '€'
+      case 'GBP': return '£'
+      case 'UGX': return 'USh'
+      default: return '$'
+    }
+  }
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset
+    reset,
+    watch
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -44,6 +56,9 @@ export default function ProfilePage() {
       default_currency: profile?.preferences?.default_currency || 'USD'
     }
   })
+  
+  // Watch the currency field to update budget label dynamically
+  const selectedCurrency = watch('default_currency')
 
   // Reset form when profile loads
   React.useEffect(() => {
@@ -167,9 +182,9 @@ export default function ProfilePage() {
 
           {/* Default Budget */}
           <Input
-            label="Default Budget ($)"
+            label={`Default Budget (${getCurrencySymbol(selectedCurrency || 'USD')})`}
             type="number"
-            step="0.01"
+            step={selectedCurrency === 'UGX' ? '1' : '0.01'}
             placeholder="Enter your default budget"
             error={errors.default_budget?.message}
             disabled={isFormLoading}
@@ -188,6 +203,7 @@ export default function ProfilePage() {
               <option value="EUR">EUR (€)</option>
               <option value="GBP">GBP (£)</option>
               <option value="CAD">CAD ($)</option>
+              <option value="UGX">UGX (USh)</option>
             </select>
             {errors.default_currency && (
               <p className="text-red-600 text-sm">{errors.default_currency.message}</p>

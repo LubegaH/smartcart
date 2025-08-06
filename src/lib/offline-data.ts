@@ -330,6 +330,43 @@ export const offlineDataService = {
       }
     },
 
+    async update(id: string, data: Partial<CreateTripData>): Promise<Result<ShoppingTrip>> {
+      try {
+        if (navigator.onLine) {
+          const result = await tripService.updateTrip(id, data)
+          if (result.success) {
+            await this.refreshCache()
+            return result
+          } else {
+            await this.queueAction({ type: 'UPDATE_TRIP', id, data })
+            return result
+          }
+        } else {
+          // Offline: update cache optimistically
+          const cached = await offlineStorage.getItem(CACHE_KEYS.trips) || []
+          const tripIndex = cached.findIndex((trip: ShoppingTrip) => trip.id === id)
+          
+          if (tripIndex >= 0) {
+            cached[tripIndex] = {
+              ...cached[tripIndex],
+              ...data,
+              updated_at: new Date().toISOString()
+            }
+            await offlineStorage.setItem(CACHE_KEYS.trips, 'trips', cached)
+
+            // Queue for sync
+            await this.queueAction({ type: 'UPDATE_TRIP', id, data })
+
+            return { success: true, data: cached[tripIndex] }
+          }
+
+          return { success: false, error: 'Trip not found in cache' }
+        }
+      } catch (error) {
+        return { success: false, error: 'Failed to update trip' }
+      }
+    },
+
     async updateStatus(id: string, status: 'planned' | 'active' | 'completed' | 'archived'): Promise<Result<ShoppingTrip>> {
       try {
         if (navigator.onLine) {

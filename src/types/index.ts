@@ -1,5 +1,8 @@
 // Core data types based on functional requirements
 
+// Supported currencies
+export type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'UGX'
+
 export interface User {
   id: string
   email: string
@@ -21,7 +24,7 @@ export interface UserProfile {
 export interface UserPreferences {
   notifications_enabled: boolean
   dark_mode: boolean
-  default_currency: string
+  default_currency: Currency
 }
 
 export interface Retailer {
