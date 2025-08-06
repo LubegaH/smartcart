@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,8 +58,15 @@ export function LoginForm() {
       <div className='max-w-md w-full space-y-8'>
         {/* SmartCart Logo */}
         <div className='text-center space-y-4'>
-          <div className='text-5xl'>🛒</div>
-          <h1 className='text-2xl font-bold text-gray-900'>SmartCart</h1>
+          <div className='flex justify-center'>
+            <Image
+              src='/smartcart_logo.png'
+              alt='SmartCart Logo'
+              width={120}
+              height={120}
+              className='h-20 w-auto'
+            />
+          </div>
         </div>
 
         {/* Login Form */}
