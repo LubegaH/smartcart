@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { TripHeader } from '@/components/trips/trip-header';
 import { ItemList } from '@/components/trips/item-list';
 import { AddItemForm } from '@/components/trips/add-item-form';
+import { useBatchedPriceIntelligence } from '@/hooks/useBatchedPriceIntelligence';
 import { dataService } from '@/lib/data';
 import type { ShoppingTrip, TripItem, CreateItemRequest } from '@/types';
 
@@ -19,6 +20,9 @@ export default function TripDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Batched price intelligence - only one set of API calls for all items
+  const { priceHints } = useBatchedPriceIntelligence(items, trip?.retailer_id);
 
   const loadTripData = async () => {
     try {
@@ -210,6 +214,7 @@ export default function TripDetailPage() {
               <AddItemForm
                 onSubmit={handleAddItem}
                 onCancel={() => setShowAddForm(false)}
+                retailerId={trip.retailer_id}
               />
             </div>
           )}
@@ -218,6 +223,7 @@ export default function TripDetailPage() {
           <ItemList
             items={items}
             tripStatus={trip.status}
+            priceHints={priceHints}
             onUpdateItem={handleUpdateItem}
             onDeleteItem={handleDeleteItem}
             emptyStateAction={

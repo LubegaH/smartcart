@@ -4,12 +4,19 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCurrency } from '@/hooks/useCurrency';
-import type { TripItem, TripStatus } from '@/types';
+import type { TripItem, TripStatus, PriceSuggestion } from '@/types';
+
+interface FormattedSuggestion {
+  suggestion: PriceSuggestion
+  displayText: string
+  formattedPrice: string
+}
 
 interface ItemCardProps {
   item: TripItem;
   tripStatus: TripStatus;
   isEditing: boolean;
+  priceHint?: FormattedSuggestion | null; // Pre-fetched price suggestion
   onToggleComplete: (item: TripItem) => void;
   onUpdateItem: (itemId: string, updates: Partial<TripItem>) => void;
   onStartEdit: () => void;
@@ -21,6 +28,7 @@ export function ItemCard({
   item,
   tripStatus,
   isEditing,
+  priceHint,
   onToggleComplete,
   onUpdateItem,
   onStartEdit,
@@ -85,6 +93,18 @@ export function ItemCard({
   const getItemTotal = () => {
     const price = item.actual_price || item.estimated_price || 0;
     return price * item.quantity;
+  };
+
+  // Helper function to determine price trend
+  const getPriceTrend = () => {
+    if (!priceHint?.suggestion.estimated || !item.estimated_price) return null;
+    
+    const currentPrice = item.actual_price || item.estimated_price;
+    const suggestedPrice = priceHint.suggestion.estimated;
+    
+    if (Math.abs(currentPrice - suggestedPrice) < 0.01) return null; // Same price
+    
+    return currentPrice > suggestedPrice ? 'higher' : 'lower';
   };
 
   return (
@@ -196,6 +216,57 @@ export function ItemCard({
                           <p className='text-xs text-gray-500'>estimated</p>
                         )}
                       </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Price Intelligence Hints */}
+                {!isEditing && priceHint && tripStatus !== 'archived' && (
+                  <div className='mt-2 space-y-1'>
+                    {/* Last paid price hint */}
+                    {priceHint.suggestion.last_paid_date && (
+                      <p className='text-xs text-gray-500'>
+                        <svg className='inline w-3 h-3 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' />
+                        </svg>
+                        Last paid {priceHint.formattedPrice} on {new Date(priceHint.suggestion.last_paid_date).toLocaleDateString()}
+                        {priceHint.suggestion.retailer_name && ` at ${priceHint.suggestion.retailer_name}`}
+                      </p>
+                    )}
+                    
+                    {/* Price trend indicator */}
+                    {getPriceTrend() && (
+                      <div className='flex items-center space-x-1'>
+                        {getPriceTrend() === 'higher' ? (
+                          <>
+                            <svg className='w-3 h-3 text-red-500' fill='currentColor' viewBox='0 0 20 20'>
+                              <path fillRule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clipRule='evenodd' />
+                            </svg>
+                            <span className='text-xs text-red-600'>
+                              Price higher than usual ({priceHint.formattedPrice} typical)
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className='w-3 h-3 text-green-500' fill='currentColor' viewBox='0 0 20 20'>
+                              <path fillRule='evenodd' d='M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z' clipRule='evenodd' />
+                            </svg>
+                            <span className='text-xs text-green-600'>
+                              Good price! (Usually {priceHint.formattedPrice})
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Confidence indicator for low confidence suggestions */}
+                    {priceHint.suggestion.confidence === 'low' && (
+                      <p className='text-xs text-amber-600'>
+                        <svg className='inline w-3 h-3 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.502 0L4.312 16.5c-.77.833.192 2.5 1.732 2.5z' />
+                        </svg>
+                        Similar item price estimate
+                      </p>
                     )}
                   </div>
                 )}

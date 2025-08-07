@@ -4,11 +4,18 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ItemCard } from './item-card';
 import { DeleteItemModal } from './delete-item-modal';
-import type { TripItem, TripStatus } from '@/types';
+import type { TripItem, TripStatus, PriceSuggestion } from '@/types';
+
+interface FormattedSuggestion {
+  suggestion: PriceSuggestion
+  displayText: string
+  formattedPrice: string
+}
 
 interface ItemListProps {
   items: TripItem[];
   tripStatus: TripStatus;
+  priceHints?: Record<string, FormattedSuggestion | null>; // Pre-fetched price hints by item name
   onUpdateItem: (itemId: string, updates: Partial<TripItem>) => Promise<void>;
   onDeleteItem: (itemId: string) => Promise<void>;
   emptyStateAction?: React.ReactNode;
@@ -17,6 +24,7 @@ interface ItemListProps {
 export function ItemList({
   items,
   tripStatus,
+  priceHints,
   onUpdateItem,
   onDeleteItem,
   emptyStateAction,
@@ -103,6 +111,7 @@ export function ItemList({
                 item={item}
                 tripStatus={tripStatus}
                 isEditing={editingItemId === item.id}
+                priceHint={priceHints?.[item.item_name.toLowerCase().trim()]}
                 onToggleComplete={handleToggleComplete}
                 onUpdateItem={handleUpdateItem}
                 onStartEdit={() => setEditingItemId(item.id)}
@@ -127,6 +136,7 @@ export function ItemList({
                 item={item}
                 tripStatus={tripStatus}
                 isEditing={editingItemId === item.id}
+                priceHint={priceHints?.[item.item_name.toLowerCase().trim()]}
                 onToggleComplete={handleToggleComplete}
                 onUpdateItem={handleUpdateItem}
                 onStartEdit={() => setEditingItemId(item.id)}
