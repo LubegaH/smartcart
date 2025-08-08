@@ -286,7 +286,7 @@ export default function TestOfflinePage() {
               </Button>
               {isOnline && queueSize > 0 && (
                 <Button
-                  variant="default"
+                  variant="primary"
                   size="sm"
                   onClick={syncNow}
                   disabled={loading}
