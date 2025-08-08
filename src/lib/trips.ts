@@ -289,5 +289,80 @@ export const tripService = {
     } catch (error) {
       return { success: false, error: 'Failed to fetch active trip' }
     }
+  },
+
+  async duplicateTrip(tripId: string, newData?: { name?: string, date?: string, retailer_id?: string }): Promise<Result<ShoppingTrip>> {
+    try {
+      // First, get the original trip and its items
+      const [tripResult, itemsResult] = await Promise.all([
+        this.getById(tripId),
+        supabase
+          .from('trip_items')
+          .select('item_name, quantity, estimated_price')
+          .eq('trip_id', tripId)
+      ]);
+
+      if (!tripResult.success || !tripResult.data) {
+        return { success: false, error: 'Original trip not found' };
+      }
+
+      const originalTrip = tripResult.data;
+
+      if (itemsResult.error) {
+        return { success: false, error: 'Failed to load trip items' };
+      }
+
+      // Create the new trip with copied data
+      const newTrip = {
+        name: newData?.name || `${originalTrip.name} (Copy)`,
+        date: newData?.date || new Date().toISOString().split('T')[0], // Default to today
+        retailer_id: newData?.retailer_id || originalTrip.retailer_id,
+        status: 'planned' as const,
+        estimated_total: originalTrip.estimated_total,
+        actual_total: null,
+        user_id: originalTrip.user_id
+      };
+
+      // Create the new trip
+      const { data: createdTrip, error: tripError } = await supabase
+        .from('shopping_trips')
+        .insert(newTrip)
+        .select(`
+          *,
+          retailer:retailers(name, location)
+        `)
+        .single();
+
+      if (tripError) {
+        return { success: false, error: tripError.message };
+      }
+
+      // Duplicate all items from the original trip
+      if (itemsResult.data && itemsResult.data.length > 0) {
+        const newItems = itemsResult.data.map(item => ({
+          trip_id: createdTrip.id,
+          item_name: item.item_name,
+          quantity: item.quantity,
+          estimated_price: item.estimated_price,
+          actual_price: null,
+          is_completed: false,
+          user_id: originalTrip.user_id
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('trip_items')
+          .insert(newItems);
+
+        if (itemsError) {
+          // If items creation fails, we should clean up the trip
+          await supabase.from('shopping_trips').delete().eq('id', createdTrip.id);
+          return { success: false, error: 'Failed to duplicate trip items' };
+        }
+      }
+
+      return { success: true, data: createdTrip as ShoppingTrip };
+    } catch (error) {
+      return { success: false, error: 'Failed to duplicate trip' };
+    }
   }
 }

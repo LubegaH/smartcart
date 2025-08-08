@@ -12,7 +12,11 @@ import { priceIntelligenceService } from './price-intelligence'
 export const dataService = {
   retailers: offlineDataService.retailers,
   trips: offlineDataService.trips,
-  tripItems: offlineDataService.items,
+  tripItems: {
+    ...offlineDataService.items,
+    // Add bulk operations
+    bulkDelete: offlineDataService.items.bulkDelete
+  },
   priceIntelligence: priceIntelligenceService, // This doesn't need offline caching as much
   sync: offlineDataService.sync
 }

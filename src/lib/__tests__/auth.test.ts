@@ -28,7 +28,8 @@ describe('authService', () => {
         email: 'test@example.com',
         password: 'password123',
         confirmPassword: 'password123',
-        acceptTerms: true
+        acceptTerms: true,
+        preferredCurrency: 'USD'
       })
 
       expect(result.success).toBe(true)
@@ -36,7 +37,12 @@ describe('authService', () => {
       expect(result.data?.needsVerification).toBe(false) // Has session
       expect(supabase.auth.signUp).toHaveBeenCalledWith({
         email: 'test@example.com',
-        password: 'password123'
+        password: 'password123',
+        options: {
+          data: {
+            preferred_currency: 'USD'
+          }
+        }
       })
     })
 
@@ -56,7 +62,8 @@ describe('authService', () => {
         email: 'test@example.com',
         password: 'password123',
         confirmPassword: 'password123',
-        acceptTerms: true
+        acceptTerms: true,
+        preferredCurrency: 'USD'
       })
 
       expect(result.success).toBe(true)
@@ -78,7 +85,8 @@ describe('authService', () => {
         email: 'test@example.com',
         password: 'password123',
         confirmPassword: 'password123',
-        acceptTerms: true
+        acceptTerms: true,
+        preferredCurrency: 'USD'
       })
 
       expect(result.success).toBe(false)
@@ -209,6 +217,8 @@ describe('authService', () => {
         error: mockError
       })
 
+      vi.mocked(handleSupabaseError).mockReturnValue('Logout failed')
+
       const result = await authService.logout()
 
       expect(result.success).toBe(false)
@@ -251,6 +261,8 @@ describe('authService', () => {
         data: {},
         error: mockError
       })
+
+      vi.mocked(handleSupabaseError).mockReturnValue('Email not found')
 
       const result = await authService.resetPassword({
         email: 'test@example.com'
@@ -295,6 +307,8 @@ describe('authService', () => {
         data: { user: null },
         error: mockError
       })
+
+      vi.mocked(handleSupabaseError).mockReturnValue('Password too weak')
 
       const result = await authService.updatePassword('weak')
 
@@ -353,6 +367,8 @@ describe('authService', () => {
         error: mockError
       })
 
+      vi.mocked(handleSupabaseError).mockReturnValue('Session expired')
+
       const result = await authService.getSession()
 
       expect(result.success).toBe(false)
@@ -398,6 +414,8 @@ describe('authService', () => {
         error: mockError
       })
 
+      vi.mocked(handleSupabaseError).mockReturnValue('Refresh token expired')
+
       const result = await authService.refreshSession()
 
       expect(result.success).toBe(false)
@@ -441,6 +459,8 @@ describe('authService', () => {
         data: {},
         error: mockError
       })
+
+      vi.mocked(handleSupabaseError).mockReturnValue('Too many requests')
 
       const result = await authService.resendVerification('test@example.com')
 

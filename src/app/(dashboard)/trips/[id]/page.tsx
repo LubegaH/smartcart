@@ -115,6 +115,23 @@ export default function TripDetailPage() {
     }
   };
 
+  const handleBulkDeleteItems = async (itemIds: string[]) => {
+    try {
+      const result = await dataService.tripItems.bulkDelete(itemIds);
+      
+      if (result.success) {
+        setItems(prev => prev.filter(item => !itemIds.includes(item.id)));
+        // Refresh trip totals
+        loadTripData();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (err) {
+      console.error('Failed to bulk delete items:', err);
+      throw err;
+    }
+  };
+
   const handleStartShopping = async () => {
     if (!trip) return;
     
@@ -130,6 +147,10 @@ export default function TripDetailPage() {
     } catch (err) {
       console.error('Failed to start shopping:', err);
     }
+  };
+
+  const handleDuplicate = (newTrip: ShoppingTrip) => {
+    router.push(`/trips/${newTrip.id}`);
   };
 
   if (isLoading) {
@@ -179,6 +200,7 @@ export default function TripDetailPage() {
           onStartShopping={handleStartShopping}
           onBack={() => router.push('/trips')}
           onContinueShopping={() => router.push(`/trips/${trip.id}/shopping`)}
+          onDuplicate={handleDuplicate}
         />
 
         {/* Items Section */}
@@ -226,6 +248,7 @@ export default function TripDetailPage() {
             priceHints={priceHints}
             onUpdateItem={handleUpdateItem}
             onDeleteItem={handleDeleteItem}
+            onBulkDeleteItems={handleBulkDeleteItems}
             emptyStateAction={
               <Button
                 onClick={() => setShowAddForm(true)}

@@ -474,6 +474,24 @@ export const offlineDataService = {
           await offlineStorage.setItem(CACHE_KEYS.trips, 'trips', result.data)
         }
       }
+    },
+
+    async duplicateTrip(tripId: string, newData?: { name?: string, date?: string, retailer_id?: string }): Promise<Result<ShoppingTrip>> {
+      if (navigator.onLine) {
+        try {
+          const result = await tripService.duplicateTrip(tripId, newData);
+          if (result.success) {
+            // Refresh cache to include new trip
+            await this.refreshCache();
+            return result;
+          }
+          return result;
+        } catch (error) {
+          return { success: false, error: 'Failed to duplicate trip' };
+        }
+      } else {
+        return { success: false, error: 'Trip duplication requires an internet connection' };
+      }
     }
   },
 
@@ -597,6 +615,44 @@ export const offlineDataService = {
         return { success: false, error: 'Item not found in cache' }
       } catch (error) {
         return { success: false, error: 'Failed to delete item' }
+      }
+    },
+
+    async bulkDelete(itemIds: string[]): Promise<Result<void>> {
+      try {
+        if (navigator.onLine) {
+          const result = await tripItemService.bulkDeleteItems(itemIds)
+          if (result.success) {
+            // Find trip IDs to refresh cache
+            const tripIds = new Set<string>()
+            for (const itemId of itemIds) {
+              const item = await this.findItemInCache(itemId)
+              if (item) {
+                tripIds.add(item.trip_id)
+              }
+            }
+            // Refresh affected trip caches
+            for (const tripId of tripIds) {
+              await this.refreshCache(tripId)
+            }
+            return result
+          }
+        }
+
+        // Offline: remove from cache optimistically
+        const tripIds = new Set<string>()
+        for (const itemId of itemIds) {
+          const item = await this.findItemInCache(itemId)
+          if (item) {
+            tripIds.add(item.trip_id)
+            await this.removeItemFromCache(itemId, item.trip_id)
+          }
+        }
+        
+        await this.queueAction({ type: 'BULK_DELETE_ITEMS', itemIds })
+        return { success: true, data: undefined }
+      } catch (error) {
+        return { success: false, error: 'Failed to bulk delete items' }
       }
     },
 
@@ -738,6 +794,16 @@ export const offlineDataService = {
               case 'CREATE_ITEM':
                 const itemResult = await tripItemService.createItem(action.tripId, action.data)
                 success = itemResult.success
+                break
+
+              case 'DELETE_ITEM':
+                const deleteResult = await tripItemService.deleteItem(action.id)
+                success = deleteResult.success
+                break
+
+              case 'BULK_DELETE_ITEMS':
+                const bulkDeleteResult = await tripItemService.bulkDeleteItems(action.itemIds)
+                success = bulkDeleteResult.success
                 break
 
               case 'UPDATE_PRICE':

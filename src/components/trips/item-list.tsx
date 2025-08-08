@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ItemCard } from './item-card';
 import { DeleteItemModal } from './delete-item-modal';
+import { BulkActions } from './bulk-actions';
 import type { TripItem, TripStatus, PriceSuggestion } from '@/types';
 
 interface FormattedSuggestion {
@@ -18,6 +19,7 @@ interface ItemListProps {
   priceHints?: Record<string, FormattedSuggestion | null>; // Pre-fetched price hints by item name
   onUpdateItem: (itemId: string, updates: Partial<TripItem>) => Promise<void>;
   onDeleteItem: (itemId: string) => Promise<void>;
+  onBulkDeleteItems?: (itemIds: string[]) => Promise<void>;
   emptyStateAction?: React.ReactNode;
 }
 
@@ -27,10 +29,13 @@ export function ItemList({
   priceHints,
   onUpdateItem,
   onDeleteItem,
+  onBulkDeleteItems,
   emptyStateAction,
 }: ItemListProps) {
   const [itemToDelete, setItemToDelete] = useState<TripItem | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   const handleDeleteSuccess = async () => {
     if (itemToDelete) {
@@ -55,6 +60,50 @@ export function ItemList({
     await onUpdateItem(itemId, updates);
     setEditingItemId(null);
   };
+
+  const handleToggleSelection = (item: TripItem) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(item.id)) {
+        newSet.delete(item.id);
+      } else {
+        newSet.add(item.id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedItems.size === items.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(items.map(item => item.id)));
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedItems(new Set());
+    setIsSelectionMode(false);
+  };
+
+  const handleBulkDelete = async (itemIds: string[]) => {
+    if (onBulkDeleteItems) {
+      await onBulkDeleteItems(itemIds);
+    } else {
+      // Fallback to individual deletes
+      for (const itemId of itemIds) {
+        await onDeleteItem(itemId);
+      }
+    }
+  };
+
+  const handleBulkUpdateQuantity = async (itemIds: string[], quantity: number) => {
+    for (const itemId of itemIds) {
+      await onUpdateItem(itemId, { quantity });
+    }
+  };
+
+  const selectedItemsArray = items.filter(item => selectedItems.has(item.id));
 
   if (items.length === 0) {
     return (
@@ -94,16 +143,53 @@ export function ItemList({
       {/* Pending Items */}
       {pendingItems.length > 0 && (
         <div className='p-4'>
-          {tripStatus === 'active' && (
-            <div className='flex items-center justify-between mb-4'>
+          <div className='flex items-center justify-between mb-4'>
+            <div>
               <h3 className='text-sm font-medium text-gray-700'>
-                Shopping List ({pendingItems.length} remaining)
+                {tripStatus === 'active' 
+                  ? `Shopping List (${pendingItems.length} remaining)`
+                  : `Items (${pendingItems.length})`
+                }
               </h3>
-              <span className='text-xs text-gray-500'>
-                Tap items to mark as found
-              </span>
+              {tripStatus === 'active' && (
+                <span className='text-xs text-gray-500'>
+                  Tap items to mark as found
+                </span>
+              )}
             </div>
-          )}
+            
+            {/* Bulk Actions Toggle */}
+            {tripStatus === 'planned' && pendingItems.length > 1 && (
+              <div className='flex items-center space-x-2'>
+                {isSelectionMode && (
+                  <Button
+                    onClick={handleSelectAll}
+                    variant='outline'
+                    size='sm'
+                    className='text-xs'
+                  >
+                    {selectedItems.size === pendingItems.length ? 'Deselect All' : 'Select All'}
+                  </Button>
+                )}
+                <Button
+                  onClick={() => {
+                    if (isSelectionMode) {
+                      handleClearSelection();
+                    } else {
+                      setIsSelectionMode(true);
+                    }
+                  }}
+                  variant={isSelectionMode ? 'default' : 'outline'}
+                  size='sm'
+                  className={`text-xs ${
+                    isSelectionMode ? 'bg-primary hover:bg-emerald-600 text-white' : ''
+                  }`}
+                >
+                  {isSelectionMode ? 'Done' : 'Select Multiple'}
+                </Button>
+              </div>
+            )}
+          </div>
           <div className='space-y-3'>
             {pendingItems.map((item) => (
               <ItemCard
@@ -117,6 +203,9 @@ export function ItemList({
                 onStartEdit={() => setEditingItemId(item.id)}
                 onCancelEdit={() => setEditingItemId(null)}
                 onDelete={handleDeleteClick}
+                isSelectable={isSelectionMode}
+                isSelected={selectedItems.has(item.id)}
+                onToggleSelection={handleToggleSelection}
               />
             ))}
           </div>
@@ -142,10 +231,23 @@ export function ItemList({
                 onStartEdit={() => setEditingItemId(item.id)}
                 onCancelEdit={() => setEditingItemId(null)}
                 onDelete={handleDeleteClick}
+                isSelectable={isSelectionMode}
+                isSelected={selectedItems.has(item.id)}
+                onToggleSelection={handleToggleSelection}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {/* Bulk Actions */}
+      {isSelectionMode && (
+        <BulkActions
+          selectedItems={selectedItemsArray}
+          onBulkDelete={handleBulkDelete}
+          onBulkUpdateQuantity={handleBulkUpdateQuantity}
+          onClearSelection={handleClearSelection}
+        />
       )}
 
       {/* Delete Confirmation Modal */}

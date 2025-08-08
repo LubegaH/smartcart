@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { AuthProvider } from '@/components/providers/auth-provider'
 import { OfflineIndicator } from '@/components/ui/offline-indicator'
+import { PWAInstallPrompt } from '@/components/pwa/install-prompt'
+import { WelcomeTour } from '@/components/onboarding/welcome-tour'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -45,6 +47,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <OfflineIndicator />
+          <PWAInstallPrompt />
+          <WelcomeTour />
           <div id="root">
             {children}
           </div>

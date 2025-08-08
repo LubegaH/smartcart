@@ -253,6 +253,50 @@ export const tripItemService = {
   },
 
   /**
+   * Delete multiple items at once
+   */
+  async bulkDeleteItems(itemIds: string[]): Promise<Result<void>> {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) {
+        return { success: false, error: 'User not authenticated' }
+      }
+
+      // Verify all items belong to user's trips
+      const { data: items, error: verifyError } = await supabase
+        .from('trip_items')
+        .select(`
+          id,
+          trip:shopping_trips(user_id)
+        `)
+        .in('id', itemIds)
+
+      if (verifyError) {
+        return { success: false, error: 'Failed to verify items ownership' }
+      }
+
+      // Check if all items belong to the user
+      const unauthorizedItems = items?.filter(item => item.trip.user_id !== user.id)
+      if (unauthorizedItems && unauthorizedItems.length > 0) {
+        return { success: false, error: 'Some items do not belong to you' }
+      }
+
+      const { error } = await supabase
+        .from('trip_items')
+        .delete()
+        .in('id', itemIds)
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      return { success: true, data: undefined }
+    } catch (error) {
+      return { success: false, error: 'Failed to delete items' }
+    }
+  },
+
+  /**
    * Bulk update items (for multiple operations)
    */
   async bulkUpdateItems(updates: Array<{ id: string; data: UpdateItemData }>): Promise<Result<TripItem[]>> {

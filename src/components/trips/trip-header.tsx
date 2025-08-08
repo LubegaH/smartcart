@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { DuplicateTripModal } from './duplicate-trip-modal';
 import { useCurrency } from '@/hooks/useCurrency';
 import type { ShoppingTrip } from '@/types';
 
@@ -11,10 +13,18 @@ interface TripHeaderProps {
   onStartShopping: () => void;
   onBack: () => void;
   onContinueShopping?: () => void;
+  onDuplicate?: (newTrip: ShoppingTrip) => void;
 }
 
-export function TripHeader({ trip, onEdit, onStartShopping, onBack, onContinueShopping }: TripHeaderProps) {
+export function TripHeader({ trip, onEdit, onStartShopping, onBack, onContinueShopping, onDuplicate }: TripHeaderProps) {
   const { formatAmount } = useCurrency();
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+
+  const handleDuplicateSuccess = (newTrip: ShoppingTrip) => {
+    if (onDuplicate) {
+      onDuplicate(newTrip);
+    }
+  };
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -224,7 +234,29 @@ export function TripHeader({ trip, onEdit, onStartShopping, onBack, onContinueSh
             Continue Shopping
           </Button>
         )}
+        
+        {/* Duplicate button for completed/archived trips */}
+        {(trip.status === 'completed' || trip.status === 'archived') && stats.total > 0 && (
+          <Button
+            onClick={() => setShowDuplicateModal(true)}
+            variant='outline'
+            className='flex-1'
+          >
+            <svg className='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z' />
+            </svg>
+            Duplicate Trip
+          </Button>
+        )}
       </div>
+      
+      {/* Duplicate Modal */}
+      <DuplicateTripModal
+        trip={trip}
+        isOpen={showDuplicateModal}
+        onClose={() => setShowDuplicateModal(false)}
+        onSuccess={handleDuplicateSuccess}
+      />
     </div>
   );
 }
