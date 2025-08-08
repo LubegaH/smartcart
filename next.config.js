@@ -67,6 +67,8 @@ const nextConfig = {
     // Allow TypeScript errors during builds (for production deployment)
     ignoreBuildErrors: true,
   },
+  // Disable static generation for dynamic pages to avoid localStorage issues
+  output: 'standalone',
   headers: async () => [
     {
       source: '/(.*)',

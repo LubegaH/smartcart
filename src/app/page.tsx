@@ -120,40 +120,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Authentication System Status */}
-          <div className='bg-white rounded-lg shadow-soft p-8 mb-12'>
-            <div className='text-center mb-6'>
-              <h2 className='text-2xl font-bold text-gray-900 mb-2'>Authentication System Ready!</h2>
-              <p className='text-gray-600'>Your SmartCart experience is fully secured and ready to use</p>
-            </div>
-            
-            <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm'>
-              <div className='flex items-center space-x-2'>
-                <span className='text-green-500 text-lg'>✓</span>
-                <span className='text-gray-700'>User registration with email verification</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <span className='text-green-500 text-lg'>✓</span>
-                <span className='text-gray-700'>Secure login/logout functionality</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <span className='text-green-500 text-lg'>✓</span>
-                <span className='text-gray-700'>Password reset flow</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <span className='text-green-500 text-lg'>✓</span>
-                <span className='text-gray-700'>Session management with persistence</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <span className='text-green-500 text-lg'>✓</span>
-                <span className='text-gray-700'>Form validation and error handling</span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <span className='text-green-500 text-lg'>✓</span>
-                <span className='text-gray-700'>Mobile-optimized UI components</span>
-              </div>
-            </div>
-          </div>
 
           {/* Call to Action */}
           <div className='text-center'>

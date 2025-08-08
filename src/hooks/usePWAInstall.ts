@@ -18,6 +18,9 @@ export function usePWAInstall() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     // Check if app is already installed
     if (window.matchMedia('(display-mode: standalone)').matches || 
         window.navigator.standalone === true) {
@@ -102,6 +105,9 @@ export function usePWAInstall() {
   };
 
   const canShowPrompt = () => {
+    // Only run on client side
+    if (typeof window === 'undefined') return false;
+    
     const remindLater = localStorage.getItem('pwa-install-remind-later');
     if (remindLater && new Date(remindLater) > new Date()) {
       return false;
