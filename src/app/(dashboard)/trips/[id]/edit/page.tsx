@@ -49,7 +49,6 @@ export default function EditTripPage() {
         name: data.name,
         date: data.date,
         retailer_id: data.retailer_id,
-        estimated_total: data.estimated_total,
       })
 
       if (result.success) {
