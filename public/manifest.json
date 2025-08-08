@@ -59,6 +59,22 @@
     }
   ],
   "categories": ["shopping", "lifestyle", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "SmartCart mobile interface"
+    },
+    {
+      "src": "/screenshot-desktop.png", 
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "SmartCart desktop interface"
+    }
+  ],
   "lang": "en",
   "dir": "ltr"
 }

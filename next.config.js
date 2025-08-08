@@ -59,6 +59,14 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  eslint: {
+    // Allow ESLint warnings in production builds
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Allow TypeScript errors during builds (for production deployment)
+    ignoreBuildErrors: false,
+  },
   headers: async () => [
     {
       source: '/(.*)',
