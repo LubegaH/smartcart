@@ -31,17 +31,18 @@ export const profileService = {
         .from('user_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          // No profile found - this is okay, return null
-          return { success: true, data: null }
-        }
         if (error.code === '42P01') {
           return { success: false, error: 'Database table not found. Please run database setup.' }
         }
         return { success: false, error: error.message }
+      }
+
+      // data will be null if no profile found, which is okay
+      if (!data) {
+        return { success: true, data: null }
       }
 
       return { success: true, data }
@@ -90,6 +91,21 @@ export const profileService = {
         return { success: false, error: 'User not authenticated' }
       }
       
+      console.log('Updating profile for user:', user.id, 'with data:', updates)
+      
+      // Check if profile exists first
+      const existingProfile = await this.getProfile()
+      if (!existingProfile.success) {
+        console.error('Failed to get existing profile:', existingProfile.error)
+        return existingProfile
+      }
+      
+      if (!existingProfile.data) {
+        // Create profile if it doesn't exist
+        console.log('No existing profile found, creating new one')
+        return await this.createProfile(user.id, updates)
+      }
+      
       // If preferences are being updated, merge with existing preferences
       const updateData: Record<string, any> = {
         display_name: updates.display_name,
@@ -97,39 +113,39 @@ export const profileService = {
       }
 
       if (updates.preferences) {
-        // Get current profile to merge preferences
-        const currentProfile = await this.getProfile()
-        if (currentProfile.success && currentProfile.data) {
-          updateData.preferences = {
-            ...currentProfile.data.preferences,
-            ...updates.preferences
-          }
-        } else {
-          updateData.preferences = {
-            notifications_enabled: true,
-            dark_mode: false,
-            default_currency: 'USD',
-            ...updates.preferences
-          }
+        updateData.preferences = {
+          ...existingProfile.data.preferences,
+          ...updates.preferences
         }
       }
       
+      console.log('Updating with data:', updateData)
+      
+      // Use maybeSingle instead of single to handle potential duplicates gracefully
       const { data, error } = await supabase
         .from('user_profiles')
         .update(updateData)
         .eq('user_id', user.id)
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) {
+        console.error('Update profile error:', error)
         if (error.code === '42P01') {
           return { success: false, error: 'Database table not found. Please run database setup.' }
         }
         return { success: false, error: error.message }
       }
 
+      if (!data) {
+        console.error('No profile returned after update')
+        return { success: false, error: 'Profile update failed - no data returned' }
+      }
+
+      console.log('Profile updated successfully:', data)
       return { success: true, data }
     } catch (error) {
+      console.error('Profile update exception:', error)
       return { success: false, error: 'Failed to update profile' }
     }
   },

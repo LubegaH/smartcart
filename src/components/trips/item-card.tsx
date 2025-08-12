@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -45,9 +45,17 @@ export function ItemCard({
   const { formatAmount, step, decimals } = useCurrency();
   const [editPrice, setEditPrice] = useState(item.actual_price?.toString() || item.estimated_price?.toString() || '');
   const [editQuantity, setEditQuantity] = useState(item.quantity.toString());
+  
+  // Reset edit values when entering edit mode or item changes
+  React.useEffect(() => {
+    if (isEditing) {
+      setEditPrice(item.actual_price?.toString() || item.estimated_price?.toString() || '');
+      setEditQuantity(item.quantity.toString());
+    }
+  }, [isEditing, item.actual_price, item.estimated_price, item.quantity]);
 
   const handleSave = () => {
-    const price = parseFloat(editPrice);
+    const price = editPrice.trim() ? parseFloat(editPrice) : null;
     const quantity = parseFloat(editQuantity);
     
     // Validate inputs
@@ -56,7 +64,7 @@ export function ItemCard({
       return;
     }
     
-    if (editPrice && (isNaN(price) || price < 0)) {
+    if (editPrice.trim() && (price === null || isNaN(price) || price < 0)) {
       alert('Please enter a valid price (0 or greater)');
       return;
     }
@@ -68,12 +76,11 @@ export function ItemCard({
       updates.quantity = quantity;
     }
     
-    if (editPrice && price !== (item.actual_price || item.estimated_price)) {
-      if (item.actual_price !== undefined) {
-        updates.actual_price = price;
-      } else {
-        updates.estimated_price = price;
-      }
+    // Handle price updates more reliably
+    const currentPrice = item.actual_price ?? item.estimated_price ?? null;
+    if (price !== currentPrice) {
+      // Always set actual_price when updating price, regardless of whether estimated_price exists
+      updates.actual_price = price;
     }
     
     // Only update if there are changes

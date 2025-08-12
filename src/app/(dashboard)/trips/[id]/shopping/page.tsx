@@ -7,17 +7,6 @@ import { useCurrency } from '@/hooks/useCurrency';
 import { dataService } from '@/lib/data';
 import type { ShoppingTrip, TripItem } from '@/types';
 
-type UndoAction = {
-  id: string;
-  type: 'toggle_complete' | 'update_price';
-  timestamp: number;
-  itemId: string;
-  itemName: string;
-  previousState: {
-    is_completed?: boolean;
-    actual_price?: number;
-  };
-};
 
 export default function ShoppingModePage() {
   const { formatAmount } = useCurrency();
@@ -29,8 +18,6 @@ export default function ShoppingModePage() {
   const [items, setItems] = useState<TripItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [undoHistory, setUndoHistory] = useState<UndoAction[]>([]);
-  const [showUndoToast, setShowUndoToast] = useState(false);
 
   // Haptic feedback helper (works on supported mobile browsers)
   const triggerHapticFeedback = (type: 'light' | 'medium' | 'heavy' = 'light') => {
@@ -49,57 +36,6 @@ export default function ShoppingModePage() {
     }
   };
 
-  // Add action to undo history (keep max 5 recent actions)
-  const addToUndoHistory = (action: Omit<UndoAction, 'id' | 'timestamp'>) => {
-    const undoAction: UndoAction = {
-      ...action,
-      id: `undo_${Date.now()}_${Math.random()}`,
-      timestamp: Date.now(),
-    };
-    
-    setUndoHistory(prev => [undoAction, ...prev.slice(0, 4)]); // Keep max 5 actions
-    setShowUndoToast(true);
-    
-    // Auto-hide undo toast after 5 seconds
-    setTimeout(() => setShowUndoToast(false), 5000);
-  };
-
-  // Undo the most recent action
-  const handleUndo = async () => {
-    if (undoHistory.length === 0) return;
-    
-    // Haptic feedback for undo action
-    triggerHapticFeedback('medium');
-    
-    const lastAction = undoHistory[0];
-    const item = items.find(i => i.id === lastAction.itemId);
-    
-    if (!item) return;
-
-    try {
-      const updateData: Partial<TripItem> = {};
-      
-      if (lastAction.type === 'toggle_complete') {
-        updateData.is_completed = lastAction.previousState.is_completed;
-      } else if (lastAction.type === 'update_price') {
-        updateData.actual_price = lastAction.previousState.actual_price;
-      }
-
-      const result = await dataService.tripItems.update(item.id, updateData);
-      
-      if (result.success) {
-        setItems(prev => prev.map(i => 
-          i.id === item.id ? { ...i, ...updateData } : i
-        ));
-        
-        // Remove the undone action from history
-        setUndoHistory(prev => prev.slice(1));
-        setShowUndoToast(false);
-      }
-    } catch (err) {
-      console.error('Failed to undo action:', err);
-    }
-  };
 
   const loadTripData = async () => {
     try {
@@ -140,15 +76,8 @@ export default function ShoppingModePage() {
       // Haptic feedback: medium pulse for checking off, light for unchecking
       triggerHapticFeedback(newCompletedState ? 'medium' : 'light');
       
-      // Record the action for undo
-      addToUndoHistory({
-        type: 'toggle_complete',
-        itemId: item.id,
-        itemName: item.item_name,
-        previousState: {
-          is_completed: item.is_completed
-        }
-      });
+      // Note: Undo functionality removed for better shopping experience
+      // Users prefer focused shopping without distracting notifications
 
       const result = await dataService.tripItems.update(item.id, { 
         is_completed: newCompletedState 
@@ -161,8 +90,6 @@ export default function ShoppingModePage() {
       }
     } catch (err) {
       console.error('Failed to toggle item:', err);
-      // Remove the undo action if the operation failed
-      setUndoHistory(prev => prev.slice(1));
     }
   };
 
@@ -170,16 +97,6 @@ export default function ShoppingModePage() {
     try {
       // Haptic feedback for price updates
       triggerHapticFeedback('light');
-      
-      // Record the action for undo
-      addToUndoHistory({
-        type: 'update_price',
-        itemId: item.id,
-        itemName: item.item_name,
-        previousState: {
-          actual_price: item.actual_price
-        }
-      });
 
       const result = await dataService.tripItems.update(item.id, { 
         actual_price: actualPrice 
@@ -192,8 +109,6 @@ export default function ShoppingModePage() {
       }
     } catch (err) {
       console.error('Failed to update price:', err);
-      // Remove the undo action if the operation failed
-      setUndoHistory(prev => prev.slice(1));
     }
   };
 
@@ -280,43 +195,6 @@ export default function ShoppingModePage() {
         </div>
       </div>
 
-      {/* Undo Toast */}
-      {showUndoToast && undoHistory.length > 0 && (
-        <div className='fixed top-20 left-0 right-0 z-30 px-4'>
-          <div className='max-w-md mx-auto'>
-            <div className='bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between'>
-              <div className='flex items-center space-x-2'>
-                <svg className='w-4 h-4 text-yellow-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.502 0L4.312 16.5c-.77.833.192 2.5 1.732 2.5z' />
-                </svg>
-                <span className='text-sm'>
-                  {undoHistory[0].type === 'toggle_complete' 
-                    ? `${undoHistory[0].previousState.is_completed ? 'Unchecked' : 'Checked'} "${undoHistory[0].itemName}"`
-                    : `Updated price for "${undoHistory[0].itemName}"`
-                  }
-                </span>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <Button
-                  size='sm'
-                  onClick={handleUndo}
-                  className='bg-yellow-600 hover:bg-yellow-500 text-white text-xs px-3 py-1 h-7'
-                >
-                  Undo
-                </Button>
-                <button
-                  onClick={() => setShowUndoToast(false)}
-                  className='text-gray-300 hover:text-white p-1'
-                >
-                  <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Shopping List */}
       <div className='max-w-md mx-auto px-4 py-4 space-y-4'>

@@ -133,27 +133,53 @@ export function TripHeader({ trip, onEdit, onStartShopping, onBack, onContinueSh
           </div>
         </div>
 
-        {trip.status === 'completed' && trip.actual_total ? (
+{trip.status === 'completed' ? (
           <div className='bg-gray-50 rounded-lg p-4'>
             <div className='flex items-center justify-between'>
               <div>
                 <p className='text-sm text-gray-500'>Actual Total</p>
                 <p className='text-xl font-semibold text-gray-900'>
-                  {formatAmount(trip.actual_total)}
+                  {trip.actual_total ? formatAmount(trip.actual_total) : 'Not recorded'}
                 </p>
-                {trip.estimated_total && (
-                  <p className={`text-xs font-medium ${
-                    trip.actual_total > trip.estimated_total ? 'text-red-600' : 'text-green-600'
-                  }`}>
-                    {trip.actual_total > trip.estimated_total ? '+' : ''}
-                    {formatAmount(trip.actual_total - trip.estimated_total)} vs. estimated
-                  </p>
+                {trip.estimated_total && trip.actual_total && (
+                  <div className='mt-1 space-y-1'>
+                    <p className={`text-xs font-medium ${
+                      trip.actual_total > trip.estimated_total ? 'text-red-600' : 'text-green-600'
+                    }`}>
+                      {trip.actual_total > trip.estimated_total ? '+' : ''}
+                      {formatAmount(Math.abs(trip.actual_total - trip.estimated_total))} vs. estimated
+                    </p>
+                    <p className={`text-xs font-medium ${
+                      trip.actual_total > trip.estimated_total ? 'text-red-600' : 'text-green-600'
+                    }`}>
+                      {trip.actual_total > trip.estimated_total ? '+' : '-'}
+                      {Math.abs(((trip.actual_total - trip.estimated_total) / trip.estimated_total * 100)).toFixed(1)}% variance
+                    </p>
+                  </div>
                 )}
               </div>
-              <div className='w-10 h-10 rounded-full bg-green-100 flex items-center justify-center'>
-                <svg className='w-5 h-5 text-green-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' />
-                </svg>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                trip.actual_total && trip.estimated_total 
+                  ? trip.actual_total > trip.estimated_total 
+                    ? 'bg-red-100' 
+                    : 'bg-green-100'
+                  : 'bg-gray-100'
+              }`}>
+                {trip.actual_total && trip.estimated_total ? (
+                  trip.actual_total > trip.estimated_total ? (
+                    <svg className='w-5 h-5 text-red-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M7 11l5-5m0 0l5 5m-5-5v12' />
+                    </svg>
+                  ) : (
+                    <svg className='w-5 h-5 text-green-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17 13l-5 5m0 0l-5-5m5 5V6' />
+                    </svg>
+                  )
+                ) : (
+                  <svg className='w-5 h-5 text-gray-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                )}
               </div>
             </div>
           </div>
