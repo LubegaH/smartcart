@@ -253,12 +253,18 @@ export default function ShoppingModePage() {
               All items have been collected. Ready to checkout?
             </p>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 // Haptic feedback for trip completion (celebration!)
                 triggerHapticFeedback('heavy');
                 
-                // Complete the trip and return to trip details
-                dataService.trips.updateStatus(trip.id, 'completed');
+                // Calculate actual total from completed items
+                const actualTotal = items.reduce((sum, item) => {
+                  const price = item.actual_price || item.estimated_price || 0;
+                  return sum + (price * item.quantity);
+                }, 0);
+                
+                // Complete the trip with actual total and return to trip details
+                await dataService.trips.complete(trip.id, actualTotal);
                 router.push(`/trips/${trip.id}`);
               }}
               className='bg-primary hover:bg-emerald-600 text-white'

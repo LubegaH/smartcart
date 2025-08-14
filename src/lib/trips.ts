@@ -13,6 +13,7 @@ export interface UpdateTripData {
   date?: string
   retailer_id?: string
   status?: TripStatus
+  actual_total?: number
 }
 
 export interface TripFilters {
@@ -163,6 +164,7 @@ export const tripService = {
       if (data.name !== undefined) updateData.name = data.name.trim()
       if (data.date !== undefined) updateData.date = data.date
       if (data.retailer_id !== undefined) updateData.retailer_id = data.retailer_id
+      if (data.actual_total !== undefined) updateData.actual_total = data.actual_total
       if (data.status !== undefined) {
         updateData.status = data.status
         if (data.status === 'completed') {
@@ -229,6 +231,16 @@ export const tripService = {
     } catch (error) {
       return { success: false, error: 'Failed to update trip status' }
     }
+  },
+
+  /**
+   * Complete a trip with actual total
+   */
+  async complete(id: string, actualTotal: number): Promise<Result<ShoppingTrip>> {
+    return await this.updateTrip(id, { 
+      status: 'completed', 
+      actual_total: actualTotal 
+    })
   },
 
   /**
