@@ -136,7 +136,7 @@ export function LoginForm() {
               href='/auth/register'
               className='text-primary font-medium hover:text-primary/80 transition-colors'
             >
-              Sign up hereb
+              Sign up here
             </Link>
           </div>
         </div>

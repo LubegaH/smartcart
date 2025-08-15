@@ -30,6 +30,7 @@ type SyncAction =
   | { type: 'CREATE_TRIP'; data: CreateTripData }
   | { type: 'UPDATE_TRIP'; id: string; data: Partial<CreateTripData> }
   | { type: 'DELETE_TRIP'; id: string }
+  | { type: 'COMPLETE_TRIP'; id: string; actualTotal: number }
   | { type: 'CREATE_ITEM'; tripId: string; data: CreateItemData }
   | { type: 'UPDATE_ITEM'; id: string; data: UpdateItemData }
   | { type: 'DELETE_ITEM'; id: string }
@@ -492,6 +493,53 @@ export const offlineDataService = {
       } else {
         return { success: false, error: 'Trip duplication requires an internet connection' };
       }
+    },
+
+    async complete(id: string, actualTotal: number): Promise<Result<ShoppingTrip>> {
+      try {
+        if (navigator.onLine) {
+          const result = await tripService.complete(id, actualTotal)
+          if (result.success) {
+            await this.refreshCache()
+            
+            // Remove from active trip cache since it's now completed
+            await offlineStorage.removeItem(CACHE_KEYS.activeTrip)
+            
+            return result
+          } else {
+            // Queue for later with the complete action
+            await this.queueAction({ type: 'COMPLETE_TRIP', id, actualTotal })
+            return result
+          }
+        } else {
+          // Offline: update cache optimistically
+          const cached = await offlineStorage.getItem(CACHE_KEYS.trips) || []
+          const tripIndex = cached.findIndex((trip: ShoppingTrip) => trip.id === id)
+          
+          if (tripIndex >= 0) {
+            cached[tripIndex] = {
+              ...cached[tripIndex],
+              status: 'completed' as const,
+              actual_total: actualTotal,
+              completed_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+            await offlineStorage.setItem(CACHE_KEYS.trips, 'trips', cached)
+
+            // Remove from active trip cache
+            await offlineStorage.removeItem(CACHE_KEYS.activeTrip)
+
+            // Queue for sync
+            await this.queueAction({ type: 'COMPLETE_TRIP', id, actualTotal })
+
+            return { success: true, data: cached[tripIndex] }
+          }
+
+          return { success: false, error: 'Trip not found in cache' }
+        }
+      } catch (error) {
+        return { success: false, error: 'Failed to complete trip' }
+      }
     }
   },
 
@@ -789,6 +837,11 @@ export const offlineDataService = {
               case 'CREATE_TRIP':
                 const tripResult = await tripService.createTrip(action.data)
                 success = tripResult.success
+                break
+
+              case 'COMPLETE_TRIP':
+                const completeResult = await tripService.complete(action.id, action.actualTotal)
+                success = completeResult.success
                 break
 
               case 'CREATE_ITEM':

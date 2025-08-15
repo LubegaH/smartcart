@@ -52,15 +52,3 @@ next-env.d.ts
 # OS
 Thumbs.db
 
-# doc files
-/docs/funtional_nonfunctional_requirements.md
-/docs/initial_wireframes.md
-/docs/production_launch_checklist.md
-/docs/production_launch_executable_checklist.md
-/docs/pwa_technical_feasibility.md
-/docs/smart_home_mgmt_product_plan.md
-/docs/SmartCart_Mobile_App_Design.md
-/docs/SUPABASE_API_DOCUMENTATION.md
-/docs/user_journey_maps.md
-/docs/user_personas_use_cases.md
-
