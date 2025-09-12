@@ -1,0 +1,26 @@
+direct_channels:
+  - pair: [frontend, backend]
+    scope: 'api_contracts'
+    protocols: ['rest', 'graphql', 'websocket']
+    description: 'Direct communication for API design and contracts'
+
+  - pair: [testing, pwa_specialist]
+    scope: 'offline_testing'
+    protocols: ['service_worker', 'indexeddb', 'sync']
+    description: 'Direct communication for offline functionality testing'
+
+routed_through_main:
+  - all_code_reviews
+  - checkpoint_approvals
+  - human_interactions
+  - error_escalations
+  - cross_functional_coordination
+
+checkpoint_requirements:
+  before_proceeding:
+    - all_tests_passing
+    - security_reviewed
+    - performance_validated
+    - offline_functionality_verified
+    - documentation_updated
+    - human_approval_received

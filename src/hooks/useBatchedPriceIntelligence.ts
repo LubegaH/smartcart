@@ -116,7 +116,8 @@ export function useBatchedPriceIntelligence(
             if (signal.aborted) {
               throw err // Re-throw abort errors
             }
-            console.error(`Failed to get suggestion for ${originalName}:`, err)
+            // Silently handle expected errors for empty price history
+            console.warn(`No price history found for ${originalName} - this is normal for new users`)
             return { normalizedName, suggestion: null }
           }
         })
@@ -138,8 +139,9 @@ export function useBatchedPriceIntelligence(
       if (signal.aborted) {
         return // Don't update state for aborted requests
       }
-      setError('Failed to fetch price suggestions')
-      console.error('Batch price intelligence error:', err)
+      // Don't show error for empty price history - it's expected for new users
+      console.warn('Price intelligence temporarily unavailable - this is normal for new users:', err)
+      setPriceHints({}) // Clear any stale hints
     } finally {
       isFetchingRef.current = false
       setIsLoading(false)

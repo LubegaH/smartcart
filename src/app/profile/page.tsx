@@ -146,7 +146,7 @@ export default function ProfilePage() {
   const isFormLoading = isLoading || isSubmitting
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-6 pb-nav">
       <div className="max-w-md mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">

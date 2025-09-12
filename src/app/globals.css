@@ -110,4 +110,27 @@
   .card-interactive {
     @apply card-elevated hover:border-primary/20 cursor-pointer;
   }
+
+  /* Safe area utilities for PWA bottom navigation */
+  .pb-safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .h-safe-area-inset-bottom {
+    height: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Enhanced focus states for better accessibility */
+  .focus-ring-primary {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+
+  /* Bottom navigation specific spacing to prevent overlap */
+  .pb-nav {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
 }

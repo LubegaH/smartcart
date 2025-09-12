@@ -4,6 +4,7 @@ import { AuthProvider } from '@/components/providers/auth-provider'
 import { OfflineIndicator } from '@/components/ui/offline-indicator'
 import { PWAInstallPrompt } from '@/components/pwa/install-prompt'
 import { WelcomeTour } from '@/components/onboarding/welcome-tour'
+import { ConditionalNav } from '@/components/navigation'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -52,6 +53,7 @@ export default function RootLayout({
           <div id="root">
             {children}
           </div>
+          <ConditionalNav />
         </AuthProvider>
       </body>
     </html>

@@ -26,6 +26,10 @@ const config: Config = {
         ring: 'hsl(var(--ring))',
         destructive: 'hsl(var(--destructive))',
         'destructive-foreground': 'hsl(var(--destructive-foreground))',
+        success: 'hsl(var(--success))',
+        'success-foreground': 'hsl(var(--success-foreground))',
+        warning: 'hsl(var(--warning))',
+        'warning-foreground': 'hsl(var(--warning-foreground))',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

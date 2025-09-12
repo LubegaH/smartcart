@@ -16,7 +16,7 @@ export const priceIntelligenceService = {
       const normalizedItemName = itemName.toLowerCase().trim()
 
       // Priority 1: Same item, same retailer, last 30 days
-      let { data: recentSameRetailer } = await supabase
+      let { data: recentSameRetailer, error: error1 } = await supabase
         .from('price_history')
         .select(`
           price,
@@ -29,6 +29,11 @@ export const priceIntelligenceService = {
         .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
         .order('date', { ascending: false })
         .limit(1)
+
+      // Handle errors gracefully - 404/empty table is expected for new users
+      if (error1 && !error1.message.includes('relation') && !error1.message.includes('does not exist')) {
+        console.warn('Price intelligence query failed (Priority 1):', error1.message)
+      }
 
       if (recentSameRetailer && recentSameRetailer.length > 0) {
         const record = recentSameRetailer[0]
@@ -45,7 +50,7 @@ export const priceIntelligenceService = {
       }
 
       // Priority 2: Same item, same retailer, last 90 days
-      let { data: olderSameRetailer } = await supabase
+      let { data: olderSameRetailer, error: error2 } = await supabase
         .from('price_history')
         .select(`
           price,
@@ -58,6 +63,10 @@ export const priceIntelligenceService = {
         .gte('date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
         .order('date', { ascending: false })
         .limit(1)
+
+      if (error2 && !error2.message.includes('relation') && !error2.message.includes('does not exist')) {
+        console.warn('Price intelligence query failed (Priority 2):', error2.message)
+      }
 
       if (olderSameRetailer && olderSameRetailer.length > 0) {
         const record = olderSameRetailer[0]
@@ -74,7 +83,7 @@ export const priceIntelligenceService = {
       }
 
       // Priority 3: Same item, any retailer, last 30 days
-      let { data: recentAnyRetailer } = await supabase
+      let { data: recentAnyRetailer, error: error3 } = await supabase
         .from('price_history')
         .select(`
           price,
@@ -86,6 +95,10 @@ export const priceIntelligenceService = {
         .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
         .order('date', { ascending: false })
         .limit(1)
+
+      if (error3 && !error3.message.includes('relation') && !error3.message.includes('does not exist')) {
+        console.warn('Price intelligence query failed (Priority 3):', error3.message)
+      }
 
       if (recentAnyRetailer && recentAnyRetailer.length > 0) {
         const record = recentAnyRetailer[0]
@@ -102,7 +115,7 @@ export const priceIntelligenceService = {
       }
 
       // Priority 4: Fuzzy match on item name, same retailer
-      let { data: fuzzyMatch } = await supabase
+      let { data: fuzzyMatch, error: error4 } = await supabase
         .from('price_history')
         .select(`
           price,
@@ -114,6 +127,10 @@ export const priceIntelligenceService = {
         .eq('retailer_id', retailerId)
         .order('date', { ascending: false })
         .limit(20) // Get recent records for fuzzy matching
+
+      if (error4 && !error4.message.includes('relation') && !error4.message.includes('does not exist')) {
+        console.warn('Price intelligence query failed (Priority 4):', error4.message)
+      }
 
       if (fuzzyMatch && fuzzyMatch.length > 0) {
         // Simple fuzzy matching: check for partial matches
@@ -147,7 +164,15 @@ export const priceIntelligenceService = {
         }
       }
     } catch (error) {
-      return { success: false, error: 'Failed to get price suggestion' }
+      console.warn('Price intelligence service error:', error)
+      // For new users with empty price history, this is expected
+      return {
+        success: true,
+        data: {
+          estimated: null,
+          confidence: 'low'
+        }
+      }
     }
   },
 

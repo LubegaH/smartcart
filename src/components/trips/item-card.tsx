@@ -45,6 +45,7 @@ export function ItemCard({
   const { formatAmount, step, decimals } = useCurrency();
   const [editPrice, setEditPrice] = useState(item.actual_price?.toString() || item.estimated_price?.toString() || '');
   const [editQuantity, setEditQuantity] = useState(item.quantity.toString());
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
   
   // Reset edit values when entering edit mode or item changes
   React.useEffect(() => {
@@ -53,6 +54,13 @@ export function ItemCard({
       setEditQuantity(item.quantity.toString());
     }
   }, [isEditing, item.actual_price, item.estimated_price, item.quantity]);
+
+  // Close actions menu when editing starts or component unmounts
+  React.useEffect(() => {
+    if (isEditing) {
+      setShowActionsMenu(false);
+    }
+  }, [isEditing]);
 
   const handleSave = () => {
     const price = editPrice.trim() ? parseFloat(editPrice) : null;
@@ -233,11 +241,30 @@ export function ItemCard({
                     </div>
                   </div>
                 ) : (
-                  <div className='flex items-center justify-between text-sm'>
-                    <div className='flex items-center space-x-3'>
+                  <div className='space-y-2 text-sm'>
+                    {/* Quantity and Price Information */}
+                    <div className='flex items-center justify-between'>
                       <span className='text-gray-600'>
                         Qty: {item.quantity}
                       </span>
+                      
+                      {/* Item Total */}
+                      {(item.actual_price || item.estimated_price) && (
+                        <span
+                          className={`font-semibold ${
+                            item.actual_price ? 'text-gray-900' : 'text-gray-600'
+                          }`}
+                        >
+                          {formatAmount(getItemTotal())}
+                          {!item.actual_price && item.estimated_price && (
+                            <span className='text-xs text-gray-500 font-normal ml-1'>estimated</span>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Price per Unit */}
+                    <div className='flex items-center justify-between'>
                       {item.actual_price ? (
                         <span className='text-gray-900 font-medium'>
                           {formatAmount(item.actual_price)} each
@@ -250,22 +277,6 @@ export function ItemCard({
                         <span className='text-gray-400'>No price set</span>
                       )}
                     </div>
-                    
-                    {/* Item Total */}
-                    {(item.actual_price || item.estimated_price) && (
-                      <div className='text-right'>
-                        <span
-                          className={`font-medium ${
-                            item.actual_price ? 'text-gray-900' : 'text-gray-600'
-                          }`}
-                        >
-                          {formatAmount(getItemTotal())}
-                        </span>
-                        {!item.actual_price && item.estimated_price && (
-                          <p className='text-xs text-gray-500'>estimated</p>
-                        )}
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -350,29 +361,58 @@ export function ItemCard({
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Actions Menu */}
             {!isEditing && tripStatus === 'planned' && (
-              <div className='flex items-center space-x-1 ml-3'>
+              <div className='relative ml-3'>
                 <Button
                   size='sm'
                   variant='ghost'
-                  onClick={onStartEdit}
-                  className='h-8 w-8 p-0'
+                  onClick={() => setShowActionsMenu(!showActionsMenu)}
+                  className='h-8 w-8 p-0 hover:bg-gray-100'
                 >
-                  <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' />
+                  <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
+                    <path d='M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z'/>
                   </svg>
                 </Button>
-                <Button
-                  size='sm'
-                  variant='ghost'
-                  onClick={() => onDelete(item)}
-                  className='h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50'
-                >
-                  <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' />
-                  </svg>
-                </Button>
+                
+                {/* Dropdown Menu */}
+                {showActionsMenu && (
+                  <>
+                    {/* Backdrop */}
+                    <div 
+                      className='fixed inset-0 z-10' 
+                      onClick={() => setShowActionsMenu(false)}
+                    />
+                    
+                    {/* Menu */}
+                    <div className='absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[120px]'>
+                      <button
+                        onClick={() => {
+                          setShowActionsMenu(false);
+                          onStartEdit();
+                        }}
+                        className='w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2'
+                      >
+                        <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' />
+                        </svg>
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowActionsMenu(false);
+                          onDelete(item);
+                        }}
+                        className='w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2'
+                      >
+                        <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' />
+                        </svg>
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 

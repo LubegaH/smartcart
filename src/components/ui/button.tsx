@@ -16,7 +16,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       secondary: "bg-secondary text-white hover:bg-secondary/90 focus-visible:ring-secondary",
       outline: "border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-900 focus-visible:ring-gray-900",
       ghost: "hover:bg-gray-100 text-gray-900 focus-visible:ring-gray-900",
-      danger: "bg-danger text-white hover:bg-danger/90 focus-visible:ring-danger"
+      danger: "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive"
     }
     
     const sizeClasses = {

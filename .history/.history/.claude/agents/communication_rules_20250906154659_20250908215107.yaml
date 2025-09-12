@@ -1,0 +1,45 @@
+direct_channels:
+  - pair: [frontend_engineer, backend_engineer]
+    scope: 'api_contracts'
+    protocols: ['rest', 'graphql', 'websocket']
+    description: 'Direct communication for API design and contracts'
+    escalation_to: main_orchestrator
+
+  - pair: [qa_e2e_engineer, frontend_engineer]
+    scope: 'testing_implementation'
+    protocols: ['playwright', 'accessibility', 'performance']
+    description: 'Direct communication for test implementation coordination'
+    escalation_to: main_orchestrator
+
+routed_through_main:
+  - all_code_reviews
+  - checkpoint_approvals
+  - human_interactions
+  - error_escalations
+  - cross_functional_coordination
+  - architecture_decisions
+  - release_decisions
+
+decision_authority:
+  final_release: main_orchestrator
+  code_quality: code_reviewer
+  performance_budgets: qa_e2e_engineer
+  security_policies: backend_engineer
+  architecture: main_orchestrator
+  documentation: docs_agent
+
+conflict_resolution:
+  code_reviewer_vs_qa: escalate_to_main_orchestrator
+  performance_vs_features: qa_e2e_engineer_has_veto_power
+  security_vs_usability: backend_engineer_has_veto_power
+  architecture_decisions: main_orchestrator_final_authority
+
+checkpoint_requirements:
+  before_proceeding:
+    - all_tests_passing
+    - security_reviewed (backend_engineer approval)
+    - performance_validated (qa_e2e_engineer approval)
+    - code_quality_approved (code_reviewer approval)
+    - documentation_updated (docs_agent approval)
+    - main_orchestrator_approval
+    - human_approval_for_major_features

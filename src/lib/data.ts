@@ -3,10 +3,13 @@ export { retailerService } from './retailers'
 export { tripService } from './trips'  
 export { tripItemService } from './trip-items'
 export { priceIntelligenceService } from './price-intelligence'
+export { shoppingSessionService } from './shopping-session'
+export { navigationContext, useShoppingSession, initializeShoppingSession } from './navigation-context'
 
 // Import offline service and price intelligence for local usage
 import { offlineDataService } from './offline-data'
 import { priceIntelligenceService } from './price-intelligence'
+import { navigationContext } from './navigation-context'
 
 // Default to offline-first services for main app usage
 export const dataService = {
@@ -18,7 +21,9 @@ export const dataService = {
     bulkDelete: offlineDataService.items.bulkDelete
   },
   priceIntelligence: priceIntelligenceService, // This doesn't need offline caching as much
-  sync: offlineDataService.sync
+  sync: offlineDataService.sync,
+  // Shopping session and navigation context
+  shopping: navigationContext
 }
 
 // Also export the offline service directly

@@ -66,7 +66,7 @@ export function BulkActions({
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50">
+    <div className="fixed bottom-20 left-4 right-4 z-40">
       <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">

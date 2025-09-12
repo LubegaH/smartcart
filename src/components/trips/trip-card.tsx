@@ -41,6 +41,21 @@ export function TripCard({ trip, onEdit, onViewDetails, onDelete }: TripCardProp
     return Math.round((completedItems / trip.items.length) * 100);
   };
 
+  const getActualTotal = () => {
+    // If actual_total is set, use it
+    if (trip.actual_total) return trip.actual_total;
+    
+    // Otherwise, calculate from item prices (fallback for old completed trips)
+    if (trip.items && trip.items.length > 0) {
+      return trip.items.reduce((sum, item) => {
+        const price = item.actual_price || item.estimated_price || 0;
+        return sum + (price * item.quantity);
+      }, 0);
+    }
+    
+    return null;
+  };
+
   return (
     <div className='bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow'>
       <div className='p-4'>
@@ -102,50 +117,53 @@ export function TripCard({ trip, onEdit, onViewDetails, onDelete }: TripCardProp
         )}
 
         {/* Actual Total (for completed trips) */}
-        {trip.status === 'completed' ? (
-          <div className='mb-4 p-3 bg-gray-50 rounded-lg'>
-            <div className='flex justify-between items-center'>
-              <span className='text-sm text-gray-600'>Final Total</span>
-              <span className='text-sm font-semibold text-gray-900'>
-                {trip.actual_total ? formatAmount(trip.actual_total) : 'Not recorded'}
-              </span>
-            </div>
-            {trip.estimated_total && trip.actual_total && (
-              <div className='space-y-1 mt-2'>
-                <div className='flex justify-between items-center'>
-                  <span className='text-xs text-gray-500'>vs. Estimated</span>
-                  <span
-                    className={`text-xs font-medium ${
-                      trip.actual_total > trip.estimated_total
-                        ? 'text-red-600'
-                        : trip.actual_total < trip.estimated_total
-                        ? 'text-green-600'
-                        : 'text-gray-600'
-                    }`}
-                  >
-                    {trip.actual_total > trip.estimated_total ? '+' : ''}
-                    {formatAmount(Math.abs(trip.actual_total - trip.estimated_total))}
-                  </span>
-                </div>
-                <div className='flex justify-between items-center'>
-                  <span className='text-xs text-gray-500'>Variance</span>
-                  <span
-                    className={`text-xs font-medium ${
-                      trip.actual_total > trip.estimated_total
-                        ? 'text-red-600'
-                        : trip.actual_total < trip.estimated_total
-                        ? 'text-green-600'
-                        : 'text-gray-600'
-                    }`}
-                  >
-                    {trip.actual_total > trip.estimated_total ? '+' : '-'}
-                    {Math.abs(((trip.actual_total - trip.estimated_total) / trip.estimated_total * 100)).toFixed(1)}%
-                  </span>
-                </div>
+        {trip.status === 'completed' ? (() => {
+          const actualTotal = getActualTotal();
+          return (
+            <div className='mb-4 p-3 bg-gray-50 rounded-lg'>
+              <div className='flex justify-between items-center'>
+                <span className='text-sm text-gray-600'>Final Total</span>
+                <span className='text-sm font-semibold text-gray-900'>
+                  {actualTotal ? formatAmount(actualTotal) : 'Not recorded'}
+                </span>
               </div>
-            )}
-          </div>
-        ) : null}
+              {trip.estimated_total && actualTotal && (
+                <div className='space-y-1 mt-2'>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-xs text-gray-500'>vs. Estimated</span>
+                    <span
+                      className={`text-xs font-medium ${
+                        actualTotal > trip.estimated_total
+                          ? 'text-red-600'
+                          : actualTotal < trip.estimated_total
+                          ? 'text-green-600'
+                          : 'text-gray-600'
+                      }`}
+                    >
+                      {actualTotal > trip.estimated_total ? '+' : ''}
+                      {formatAmount(Math.abs(actualTotal - trip.estimated_total))}
+                    </span>
+                  </div>
+                  <div className='flex justify-between items-center'>
+                    <span className='text-xs text-gray-500'>Variance</span>
+                    <span
+                      className={`text-xs font-medium ${
+                        actualTotal > trip.estimated_total
+                          ? 'text-red-600'
+                          : actualTotal < trip.estimated_total
+                          ? 'text-green-600'
+                          : 'text-gray-600'
+                      }`}
+                    >
+                      {actualTotal > trip.estimated_total ? '+' : '-'}
+                      {Math.abs(((actualTotal - trip.estimated_total) / trip.estimated_total * 100)).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })() : null}
 
         {/* Actions */}
         <div className='flex items-center space-x-2'>
