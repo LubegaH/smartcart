@@ -1,3 +1,55 @@
+## Roadmap Status and Governance
+
+**Last audited**: August 6, 2026
+
+**Audit basis**: repository evidence on `main` at `72ee191`, the August 5, 2026 recovery baseline, and a file-level review of routes, services, migrations, PWA assets, and tests.
+
+**Current program state**: **MVP Recovery & Verification**
+
+**Active checkpoint**: **Recovery Gate R1**
+
+**Next product milestone**: Paused until Recovery Gate R1 passes.
+
+### Status vocabulary
+
+- **Verified**: implementation exists and all applicable quality gates pass in the current environment.
+- **Implemented — unverified**: substantial implementation evidence exists, but current quality gates fail or required integration/manual validation has not run.
+- **Partial**: some deliverables exist, with material scope or acceptance criteria still missing.
+- **Not started**: no meaningful repository evidence was found.
+- A checked task records implementation evidence from the historical roadmap. It does **not** override the checkpoint's audited verification status.
+
+### Recovery baseline
+
+| Gate | Audited result |
+| --- | --- |
+| Locked dependency install | Passed using an isolated npm cache; 840 packages installed |
+| Dependency audit | 30 vulnerabilities: 3 critical, 21 high, 3 moderate, 3 low |
+| TypeScript | Failed: 355 errors across 31 files |
+| ESLint | Failed: 12 errors and 171 warnings |
+| Unit/component tests | Failed: 171 passed, 23 failed out of 194 |
+| Supabase integration tests | Not verified; credential-dependent tests were skipped |
+| Production build | Passed only because type and lint validation are disabled in `next.config.js` |
+| Playwright E2E | No tests executed; configured web server timed out after watcher errors and a port mismatch |
+| Production HTTP smoke test | Passed: `/` returned HTTP 200 |
+
+### Audited checkpoint summary
+
+| Checkpoint | Audited status | Repository evidence and remaining gap |
+| --- | --- | --- |
+| 1.1 Product requirements | Documented — unverified | Personas, journeys, requirements, feasibility, and wireframes are present; KPIs are embedded in this roadmap rather than maintained as a separate current document. |
+| 1.2 Technical architecture | Implemented — unverified | Next.js, TypeScript, Supabase, Zustand, Tailwind, PWA, and test tooling exist. Type/lint gates fail, no deployment automation is present, and production build validation is bypassed. |
+| 2.1 Authentication and accounts | Implemented — unverified | Auth routes, forms, provider, profile service, and migrations exist. Auth runtime tests pass, but profile tests fail and live Supabase flows were not validated. |
+| 2.2 Core data models | Implemented — unverified | Core tables, RLS policies, indexes, triggers, service layers, realtime, and offline code exist. Type contracts are broken and database integration tests were skipped. |
+| 2.3 Retailer management | Partial — unverified | CRUD UI/services, selection, search, analytics display, and tests exist. Duplicate prevention remains open and 14 retailer component tests fail. |
+| 2.4 Shopping trip management | Implemented — unverified | Trip/item routes, CRUD services, duplication, bulk actions, totals, and runtime service tests exist. Type errors and absent E2E validation block completion. |
+| 2.5 Active Shopping Mode | Implemented — unverified | Dedicated shopping route, check-off, price editing, progress, running totals, completion, haptics, and swipe gestures exist. Undo was explicitly removed, offline contracts fail type-checking, and E2E did not run. |
+| 2.6 Intelligent price memory | Implemented — unverified | Price service, fuzzy matching, confidence levels, history UI, batched hooks, and runtime tests exist. Claimed matching accuracy was not measured and current type-checking fails. |
+| 3.1 PWA and mobile optimization | Partial | PWA config, offline fallback, manifest, install prompts, icons, and gestures exist. The manifest references missing icon/screenshot files; push notifications, device matrix testing, and verified offline sync remain open. |
+| 3.2 UX and interface polish | Partial | A component library, responsive UI, onboarding, loading/error patterns, and accessibility tests exist. User research, dark mode, cross-browser validation, help content, and passing accessibility gates remain open. |
+| 3.3 Analytics and monitoring | Not started | No analytics, error monitoring, alerting, admin metrics, or documented event taxonomy was found. |
+| 4.1–4.2 Beta and launch | Not started | No beta evidence, deployment automation, production monitoring, incident response, or backup validation was found. |
+| 5.1–5.2 Post-MVP evolution | Future | These remain discovery activities dependent on a verified MVP and real user data. |
+
 ## Executive Summary
 Building an intelligent home management PWA focused on grocery shopping optimization, price tracking, and consumption prediction. The MVP centers on "Shopping Trips" with real-time price updating and intelligent price memory.
 
@@ -13,6 +65,8 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 ### Checkpoint 1.1: Product requirements document
 **Deliverable**: Comprehensive product requirements document
 
+**Audited status**: **DOCUMENTED — UNVERIFIED**
+
 **Tasks**:
 - [x] Define user personas and primary use cases
 - [x] Create user journey maps for core flows
@@ -26,13 +80,15 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 ### Checkpoint 1.2: Technical Architecture Planning
 **Deliverable**: Technical architecture document and development environment setup
 
+**Audited status**: **IMPLEMENTED — UNVERIFIED**
+
 **Tasks**:
 - [x] Set up Next.js + TypeScript project with PWA configuration - ✅ COMPLETED on June 26, 2025
 - [x] Choose database solution (Supabase recommended for auth + real-time features) - ✅ COMPLETED
 - [x] Select state management library (Zustand for simplicity, Redux Toolkit for complexity) - ✅ COMPLETED - Zustand selected
 - [x] Choose UI component library (Tailwind CSS + shadcn/ui for design system) - ✅ COMPLETED - Tailwind + custom components
-- [ ] Select deployment platform (Vercel for seamless Next.js integration) - ⏳ Configured, ready for deployment
-- [ ] Design database schema for users, trips, items, retailers, prices - ⏳ Database types defined, schema implementation pending
+- [ ] Select and document the deployment platform - no deployment automation or platform binding was found in the audited repository
+- [x] Design database schema for users, trips, items, retailers, prices - migrations and types exist; deployed-schema verification remains in Recovery Gate R1
 
 **Implementation Summary**:
 - ✅ Next.js 15 with App Router + TypeScript strict mode configured
@@ -43,8 +99,8 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - ✅ Form handling with react-hook-form + zod validation
 - ✅ Project structure following CLAUDE.md specifications
 - ✅ Base UI components (Button, Input) following touch-friendly design
-- ✅ Bundle size: 101KB initial load (well within 300KB target)
-- ✅ Build pipeline working with TypeScript, ESLint, PWA generation
+- ⚠️ August 2026 build: 101KB shared JavaScript and 163–200KB first-load JavaScript by route; performance budgets have not been independently validated
+- ❌ Production build currently skips failing TypeScript and ESLint validation
 **Recommended Tech Stack for Next.js + TypeScript:**
 
 **Frontend:**
@@ -78,8 +134,8 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - Date-fns for date manipulation
 - Recharts for data visualization (future features)
 - [x] Set up Next.js development environment with TypeScript
-- [x] Configure Supabase project and database schema
-- [x] Set up Vercel deployment pipeline with preview environments
+- [x] Create Supabase database migrations and schema types - live environment and migration state unverified
+- [ ] Set up a deployment pipeline with preview environments - no repository evidence found
 - [x] Plan security approach (Supabase Row Level Security + NextAuth.js if needed)
 - [ ] Create technical documentation templates
 - [x] Establish code quality standards and review process
@@ -89,7 +145,9 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 ## Phase 2: MVP Core Development (Weeks 3-10)
 
 ### Checkpoint 2.1: User Authentication & Account Management
-**Deliverable**: Working authentication system - ✅ **COMPLETED & APPROVED** on June 27, 2025
+**Deliverable**: Working authentication system
+
+**Audited status**: **IMPLEMENTED — UNVERIFIED**. The 2025 completion record is historical; profile tests and live Supabase validation must pass before this checkpoint is verified.
 
 **Tasks**:
 - [x] Implement user registration with Supabase Auth - ✅ COMPLETED
@@ -97,7 +155,7 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - [x] Build password reset flow with Supabase Auth - ✅ COMPLETED
 - [x] Implement session management with Supabase JWT - ✅ COMPLETED
 - [x] Create user profile management with Supabase tables - ✅ COMPLETED
-- [x] Add data privacy controls (GDPR compliance) - ✅ COMPLETED
+- [x] Add account export/deletion privacy controls - implementation exists; GDPR compliance has not been independently verified
 - [x] Write authentication unit tests with Vitest - ✅ COMPLETED
 - [x] Document Supabase API usage and authentication patterns - ✅ COMPLETED
 - [x] Implement PWA offline functionality - ✅ COMPLETED
@@ -133,7 +191,9 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - Accessibility-compliant form controls
 
 ### Checkpoint 2.2: Core Data Models & Database
-**Deliverable**: Complete data layer with API endpoints - ✅ **COMPLETED & APPROVED** on June 27, 2025
+**Deliverable**: Complete data layer with API endpoints
+
+**Audited status**: **IMPLEMENTED — UNVERIFIED**. Migrations and services exist, but current type contracts fail and database integration tests were skipped.
 
 **Tasks**:
 - [x] Implement User model with profile data - ✅ COMPLETED
@@ -156,7 +216,7 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - ✅ Real-time subscriptions for live data updates across browser tabs
 - ✅ Offline-first data layer with optimistic updates and sync queue
 - ✅ Price intelligence system with fuzzy matching and confidence scoring
-- ✅ Unit tests for all core services with 95%+ coverage
+- ⚠️ Unit tests exist for core services; the current suite has 23 failures and coverage was not measured by the recovery audit
 - ✅ Manual testing interface confirming all operations work correctly
 - ✅ Performance indexes for efficient querying
 - ✅ Automatic sync when connection returns from offline
@@ -177,7 +237,9 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - Intelligent price suggestions based on purchase history
 
 ### Checkpoint 2.3: Retailer Management System
-**Deliverable**: Complete retailer creation and management - ✅ **~80% COMPLETE** - Major functionality implemented
+**Deliverable**: Complete retailer creation and management
+
+**Audited status**: **PARTIAL — UNVERIFIED**. Duplicate prevention remains open and 14 retailer component tests currently fail.
 
 **Tasks**:
 - [x] Design retailer creation/edit forms - ✅ COMPLETED
@@ -199,7 +261,9 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - ⚠️ Minor gap: Duplicate retailer name validation needs enhancement
 
 ### Checkpoint 2.4: Shopping Trip Management
-**Deliverable**: Full shopping trip CRUD functionality - ✅ **COMPLETED & APPROVED** on August 8, 2025
+**Deliverable**: Full shopping trip CRUD functionality
+
+**Audited status**: **IMPLEMENTED — UNVERIFIED**. The principal UI and service paths exist, but type errors and missing E2E verification block completion.
 
 **Tasks**:
 - [x] Design trip creation form (name, date, retailer selection) - ✅ COMPLETED
@@ -228,7 +292,9 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - ✅ BulkActions toolbar with confirmation dialogs and progress indicators
 
 ### Checkpoint 2.5: Active Shopping Mode (Core Feature)
-**Deliverable**: The app's key differentiating feature - ✅ **COMPLETED & APPROVED** on August 8, 2025
+**Deliverable**: The app's key differentiating feature
+
+**Audited status**: **IMPLEMENTED — UNVERIFIED**. Core shopping interactions exist; undo is not implemented, offline type contracts fail, and the E2E suite did not execute.
 
 **Tasks**:
 - [x] Design "Active Shopping" UI mode toggle - ✅ COMPLETED (dedicated /shopping route)
@@ -238,7 +304,7 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - [x] Add shopping progress indicators (items completed/total) - ✅ COMPLETED
 - [x] Implement trip completion flow from active mode - ✅ COMPLETED
 - [x] Build offline support for active shopping (critical feature) - ✅ COMPLETED
-- [x] Add undo functionality for accidental check-offs or price changes - ✅ COMPLETED
+- [ ] Add undo functionality for accidental check-offs or price changes - REMOVED from the current implementation; product decision required
 - [x] Create shopping mode accessibility features - ✅ COMPLETED (keyboard navigation)
 - [x] Optimize for mobile touch interactions and performance - ✅ COMPLETED
 - [x] Add haptic feedback and swipe gestures for enhanced mobile UX - ✅ COMPLETED
@@ -254,13 +320,15 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - ✅ Full offline support with data synchronization
 - ✅ Touch-friendly interactions with large tap targets (56px+)
 - ✅ Shopping list organization (pending vs completed items)
-- ✅ Undo functionality with action history and toast notifications
+- ❌ Undo functionality is not present; the shopping page explicitly records that it was removed
 - ✅ Swipe gestures for mobile interactions
 - ✅ Running total display with sticky bottom UI
 - ✅ Haptic feedback for tactile confirmation
 
 ### Checkpoint 2.6: Intelligent Price Memory System
-**Deliverable**: Smart price suggestions and history display - ✅ **COMPLETED & APPROVED** on August 8, 2025
+**Deliverable**: Smart price suggestions and history display
+
+**Audited status**: **IMPLEMENTED — UNVERIFIED**. The service and UI integrations exist, but current type-checking fails and the historical 85%+ accuracy claim has no current benchmark evidence.
 
 **Tasks**:
 - [x] Implement item name matching algorithm (fuzzy matching) - ✅ COMPLETED (in price-intelligence.ts)
@@ -291,13 +359,53 @@ Building an intelligent home management PWA focused on grocery shopping optimiza
 - Batched hook system preventing excessive API calls
 - ItemCard integration showing price history and trends
 - AddItemForm integration with auto-suggestions
-- Comprehensive unit tests and manual testing verification
+- Unit tests and manual test surfaces exist; current verification is incomplete under Recovery Gate R1
 
 ---
 
-## **PHASE 2 COMPLETION REPORT - August 8, 2025**
+## Recovery Gate R1: Security, Quality, and Verification
 
-### **✅ PHASE 2 FULLY COMPLETED & APPROVED**
+**Deliverable**: A secure, reproducible MVP baseline whose required quality gates pass before new milestone development begins.
+
+**Audited status**: **ACTIVE — BLOCKS THE NEXT PRODUCT MILESTONE**
+
+### Required work
+
+- [x] Audit roadmap claims against current repository evidence
+- [x] Reconcile the roadmap, status page, and development state
+- [ ] Rotate any real `SUPABASE_SERVICE_ROLE_KEY` and `NEXTAUTH_SECRET` values committed in `.env.production`
+- [ ] Remove secrets from tracked files and repository history; replace them with documented environment-variable setup
+- [ ] Remove the 530 tracked `.history/` files and add an appropriate ignore rule
+- [ ] Triage 30 dependency vulnerabilities, prioritizing 3 critical and 21 high findings without applying unreviewed breaking upgrades
+- [ ] Reduce TypeScript failures from 355 to zero and keep `npm run type-check` green
+- [ ] Reduce ESLint failures from 12 errors and 171 warnings to the agreed clean baseline
+- [ ] Fix the 23 failing unit/component tests and keep all 194 current tests passing
+- [ ] Configure a safe Supabase test environment and run the skipped database/RLS integration tests
+- [ ] Separate Vitest and Playwright discovery so E2E specifications are not treated as unit-test suites
+- [ ] Fix Playwright web-server startup, including the port mismatch and watcher exhaustion, then run the complete browser matrix
+- [ ] Supply every icon and screenshot referenced by `public/manifest.json` and validate installability
+- [ ] Remove `typescript.ignoreBuildErrors` and `eslint.ignoreDuringBuilds` from `next.config.js`
+- [ ] Validate authentication, retailer CRUD, trip CRUD, Active Shopping Mode, price memory, completion totals, and offline reconciliation end to end
+- [ ] Add a CI workflow that enforces install, type-check, lint, unit tests, build, and a practical E2E subset
+- [ ] Re-run the recovery baseline and record dated evidence in this roadmap
+
+### Exit criteria
+
+Recovery Gate R1 passes only when:
+
+1. No production secrets are tracked or present in Git history.
+2. Dependency risk has been reviewed and no unaccepted critical/high vulnerability remains.
+3. Type-check, lint, unit tests, integration tests, production build, and the agreed E2E suite pass without bypasses.
+4. The core authenticated and offline shopping journeys have dated verification evidence.
+5. The repository is clean, CI enforces the same gates, and this roadmap reflects the verified result.
+
+---
+
+## Archived Phase 2 Completion Report — August 8, 2025
+
+> **Superseded by the August 6, 2026 audit.** This report is retained as historical context. Its completion, approval, test, security, performance, and technical-debt claims are not current verification evidence.
+
+### Historical claim: Phase 2 fully completed and approved
 All Phase 2 MVP core development tasks have been successfully implemented, tested, and approved. SmartCart now has a fully functional MVP with all planned features working end-to-end.
 
 ### **Major Achievements Completed**
@@ -337,7 +445,7 @@ All Phase 2 MVP core development tasks have been successfully implemented, teste
 
 ---
 
-## **PROJECT STATUS REPORT - August 8, 2025**
+## Archived Project Status Report — August 8, 2025
 
 ### **Executive Summary**
 SmartCart now has **complete MVP functionality** with 100% of Phase 2 core features implemented. The app provides the full user experience from trip planning through active shopping with intelligent price tracking.
@@ -363,16 +471,16 @@ SmartCart now has **complete MVP functionality** with 100% of Phase 2 core featu
 - **Technical Debt Low** - Clean codebase with proper architecture
 - **Performance Targets Met** - Bundle size, load times, interaction responsiveness
 
-### **✅ PHASE 2 MVP CORE DEVELOPMENT - COMPLETE**
+### Historical claim: Phase 2 MVP core development complete
 
-#### **✅ All Critical Features Implemented**
+#### Historically reported critical features
 1. **✅ Price Intelligence System** - Complete UI integration with auto-suggestions and history
 2. **✅ Advanced Shopping Mode** - Undo functionality, haptic feedback, running totals
 3. **✅ PWA Experience** - Installation prompts, onboarding flow, offline-first
 4. **✅ Trip Management** - Duplication, bulk operations, complete CRUD
 5. **✅ Test Suite Improvement** - Fixed 7/28 failing tests (75% improvement)
 
-#### **Ready for Phase 3: MVP Polish & Launch Prep**
+#### Historical Phase 3 readiness claim
 1. **Test Suite Completion** - Address remaining 21 test failures
 2. **User Experience Polish** - Error boundaries, loading states, edge case handling
 3. **Launch Infrastructure** - Production deployment, monitoring, analytics
@@ -418,25 +526,31 @@ SmartCart now has **complete MVP functionality** with 100% of Phase 2 core featu
 
 ---
 
-## Phase 3: MVP Polish & Launch Prep (Weeks 11-12)
+## Phase 3: MVP Polish & Launch Prep (after Recovery Gate R1)
+
+**Phase status**: **PAUSED** until Recovery Gate R1 passes. Some PWA and UX scope has implementation evidence and is classified below as partial rather than not started.
 
 ### Checkpoint 3.1: PWA Features & Mobile Optimization
 **Deliverable**: Full PWA capabilities and mobile experience
 
+**Audited status**: **PARTIAL**
+
 **Tasks**:
-- [ ] Implement service worker for offline functionality
-- [ ] Add app manifest for installability
+- [x] Implement service worker for offline functionality - implementation exists; verification pending
+- [x] Add app manifest for installability - manifest exists but references missing assets
 - [ ] Create push notification system for basic alerts
 - [ ] Optimize for various screen sizes and orientations
-- [ ] Add touch gestures and mobile-specific interactions
+- [x] Add touch gestures and mobile-specific interactions - swipe and haptic implementations exist; device verification pending
 - [ ] Implement app icon and splash screens
-- [ ] Test offline-to-online data sync with Supabase real-time
-- [ ] Add PWA installation prompts and onboarding
+- [ ] Test offline-to-online data sync with Supabase real-time - implementation exists; verification blocked by Recovery Gate R1
+- [x] Add PWA installation prompts and onboarding - implementation exists; acceptance testing pending
 - [ ] Optimize app performance and loading times
 - [ ] Test on various mobile devices and browsers
 
 ### Checkpoint 3.2: User Experience & Interface Polish
 **Deliverable**: Polished, intuitive user interface
+
+**Audited status**: **PARTIAL**. UI foundations exist, but there is no current user-testing, cross-browser, dark-mode, or passing accessibility evidence.
 
 **Tasks**:
 - [ ] Conduct user testing sessions with prototype
@@ -452,6 +566,8 @@ SmartCart now has **complete MVP functionality** with 100% of Phase 2 core featu
 
 ### Checkpoint 3.3: Data Analytics & Monitoring
 **Deliverable**: Usage tracking and performance monitoring
+
+**Audited status**: **NOT STARTED**
 
 **Tasks**:
 - [ ] Implement user analytics tracking (privacy-compliant)
@@ -483,6 +599,8 @@ Deliverable: Detailed 18-month product roadmap with quarterly milestones
 ---
 
 ## Phase 4: MVP Launch & Initial Iteration (Weeks 13-16)
+
+**Phase status**: **NOT STARTED**. Launch work remains downstream of Recovery Gate R1 and Phase 3 verification.
 
 ### Checkpoint 4.1: Beta Testing & Quality Assurance
 **Deliverable**: Bug-free, tested application ready for launch
@@ -518,6 +636,8 @@ Deliverable: Detailed 18-month product roadmap with quarterly milestones
 ---
 
 ## Phase 5: Post-MVP Evolution (Weeks 17-20+)
+
+**Phase status**: **FUTURE DISCOVERY**. Prioritization requires a verified MVP and real user evidence.
 
 ### Checkpoint 5.1: Data-Driven Feature Prioritization
 **Deliverable**: Phase 2 feature development plan based on real user data

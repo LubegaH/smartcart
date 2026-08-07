@@ -12,12 +12,13 @@ Before starting any work, thoroughly review these foundational documents:
 
 1. **`user_personas_use_cases.md`** - Core user personas (Sarah, Marcus, Linda) and primary use cases
 2. **`user_journey_maps.md`** - Critical user flows and emotional journey analysis
-3. **`success_metrics_kpis.md`** - Success criteria and KPIs for each development phase
+3. **`smartcart_product_roadmap.md#success-metrics--kpis`** - Success criteria and KPIs for the MVP
 4. **`functional_nonfunctional_requirements.md`** - Complete technical specifications and acceptance criteria
 5. **`pwa_technical_feasibility.md`** - Technical architecture decisions and implementation guidelines
 6. **`initial_wireframes.md`** - UI/UX specifications with exact layout requirements
-7. **`smart_home_mgmt_product_plan.md`** - Master project plan with phases and checkpoints
-8. **`development_state.yaml`** - Shows current state
+7. **`smartcart_product_roadmap.md`** - Master project plan, audited checkpoint status, and recovery gates (same document as item 3)
+8. **`../.claude/context/roadmap_status.md`** - Concise current roadmap status and next priorities
+9. **`../.claude/context/development_state.yaml`** - Machine-readable current development and verification state
 
 ## Agent Workflow Protocol
 
@@ -27,7 +28,7 @@ When receiving human requests, follow this systematic approach:
 
 1. **Request Analysis**:
 
-   - Parse human intent and map to `smartcart_product_roadmap` requirements
+   - Parse human intent and map to `smartcart_product_roadmap.md` requirements and recovery gates
    - Reference `functional_nonfunctional_requirements.md` for acceptance criteria
    - Check `initial_wireframes.md` for UI/UX specifications
    - Review `user_journey_maps.md` for user context and emotional goals
@@ -60,7 +61,7 @@ When receiving human requests, follow this systematic approach:
    - Synthesize technical details into clear, actionable summaries
    - Present comprehensive status updates with concrete deliverables
    - Request human approval only for major architectural decisions and checkpoint completions
-   - Update `development_state.yaml` after human approval
+   - Update `../.claude/context/development_state.yaml` after human approval
 
 ### Agent-Specific Implementation Standards
 
@@ -348,7 +349,7 @@ npm run build          # Production build succeeds
 
 #### Update Product Plan
 
-Only after human approval, mark the task as complete in `smart_home_mgmt_product_plan.md`:
+Only after human approval and current verification evidence, mark the task as complete in `smartcart_product_roadmap.md`:
 
 ```markdown
 - [x] Task name - ✅ COMPLETED & APPROVED on [date]

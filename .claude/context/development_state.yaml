@@ -1,27 +1,80 @@
-version: 1.0.0
-last_checkpoint: 2.1
-current_phase: 'MVP Core Development'
-active_feature: 'shopping_trip_crud'
+version: 1.1.0
+last_checkpoint: '2.6_historically_implemented_unverified'
+current_phase: 'MVP Recovery & Verification'
+active_feature: 'recovery_gate_r1'
+roadmap_source: 'docs/smartcart_product_roadmap.md'
+last_audited: '2026-08-06'
 cache_breakpoint: '=== END SYSTEM STATE ==='
 
 completed_tasks:
-  - id: auth_system
+  - id: auth_system_historical
     hash: 'a3f4b2c1'
     completion_date: '2025-06-27'
-    description: 'User registration, login, password reset'
-  - id: database_types
+    verification_status: 'implemented_unverified'
+    description: 'User registration, login, password reset, and profile foundations exist; current profile tests fail and live integration is unverified'
+  - id: database_types_historical
     hash: 'b5d3e4f2'
     completion_date: '2025-06-26'
-    description: 'TypeScript types for Supabase schema'
+    verification_status: 'implemented_unverified'
+    description: 'Supabase schema, migrations, RLS, triggers, and TypeScript types exist; current type-check and database integration gates do not pass'
+
+recovery_baseline:
+  run_date: '2026-08-05'
+  commit: '72ee191ee4507c67c5dc4c0cc1aeb5d7dc99e5c0'
+  dependency_install: 'passed_with_isolated_cache'
+  dependency_vulnerabilities:
+    total: 30
+    critical: 3
+    high: 21
+    moderate: 3
+    low: 3
+  type_check:
+    status: 'failed'
+    errors: 355
+    files: 31
+  lint:
+    status: 'failed'
+    errors: 12
+    warnings: 171
+  unit_component_tests:
+    status: 'failed'
+    passed: 171
+    failed: 23
+    total: 194
+  database_integration_tests: 'not_verified_missing_safe_test_credentials'
+  production_build: 'passed_with_type_and_lint_bypasses'
+  e2e: 'blocked_webserver_timeout_no_tests_executed'
+  production_smoke: 'passed_http_200'
 
 active_context:
-  files_modified: []
-  pending_tests: []
-  review_queue: []
+  files_modified:
+    - 'docs/smartcart_product_roadmap.md'
+    - '.claude/context/roadmap_status.md'
+    - '.claude/context/development_state.yaml'
+    - 'docs/CLAUDE.md'
+  pending_tests:
+    - 'type_check'
+    - 'lint'
+    - 'unit_component_suite'
+    - 'supabase_database_and_rls_integration'
+    - 'playwright_e2e'
+    - 'pwa_install_and_offline_sync'
+    - 'authenticated_core_user_journeys'
+  review_queue:
+    - 'tracked_production_secrets_and_git_history'
+    - 'dependency_vulnerabilities'
+    - 'tracked_editor_history_files'
+    - 'build_validation_bypasses'
+    - 'pwa_manifest_missing_assets'
 
 agent_observations:
-  - timestamp: 2025-01-27T10:00:00Z
-    agent: tech_lead
+  - timestamp: '2025-01-27T10:00:00Z'
+    agent: 'tech_lead'
     action: 'workflow_initialized'
     status: 'ready'
     note: 'Multi-agent system ready for SmartCart development'
+  - timestamp: '2026-08-06T00:00:00+03:00'
+    agent: 'codex'
+    action: 'roadmap_recovery_audit'
+    status: 'reconciled'
+    note: 'Historical Phase 2 implementation evidence retained, completion claims superseded, and Recovery Gate R1 made the blocking next checkpoint'
